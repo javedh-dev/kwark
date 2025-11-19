@@ -10,4 +10,9 @@ declare global {
 	}
 }
 
-export {};
+declare module '$env/static/private' {
+	export const OPENAI_API_KEY: string;
+	export const OPENAI_BASE_URL: string;
+}
+
+export { };
