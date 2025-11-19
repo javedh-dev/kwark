@@ -1,4 +1,4 @@
-import { OPENAI_API_KEY, OPENAI_BASE_URL } from '$env/static/private';
+import { LLM_API_KEY, LLM_BASE_URL, LLM_MODEL } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -10,8 +10,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			throw error(400, 'Invalid messages format');
 		}
 
-		const apiKey = OPENAI_API_KEY || '';
-		const baseUrl = OPENAI_BASE_URL || 'https://api.openai.com/v1';
+		const apiKey = LLM_API_KEY || '';
+		const baseUrl = LLM_BASE_URL || 'https://api.openai.com/v1';
 
 		const response = await fetch(`${baseUrl}/chat/completions`, {
 			method: 'POST',
@@ -20,7 +20,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				Authorization: `Bearer ${apiKey}`
 			},
 			body: JSON.stringify({
-				model: 'openrouter/openai/gpt-5-mini',
+				model: LLM_MODEL,
 				messages,
 				stream: true
 			})
@@ -60,7 +60,8 @@ export const POST: RequestHandler = async ({ request }) => {
 									const parsed = JSON.parse(data);
 									const content = parsed.choices?.[0]?.delta?.content;
 									if (content) {
-										controller.enqueue(new TextEncoder().encode(`data: ${content}\n\n`));
+										// Use JSON.stringify to preserve newlines and special characters
+										controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(content)}\n\n`));
 									}
 								} catch (e) {
 									console.error('Error parsing SSE data:', e);

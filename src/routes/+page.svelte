@@ -4,12 +4,55 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { ArrowUp, Paperclip, Wrench } from '@lucide/svelte';
 	import { Diamonds } from 'svelte-loading-spinners';
+	import { marked } from 'marked';
+	import hljs from 'highlight.js/lib/core';
+	import javascript from 'highlight.js/lib/languages/javascript';
+	import typescript from 'highlight.js/lib/languages/typescript';
+	import python from 'highlight.js/lib/languages/python';
+	import bash from 'highlight.js/lib/languages/bash';
+	import json from 'highlight.js/lib/languages/json';
+	import css from 'highlight.js/lib/languages/css';
+	import xml from 'highlight.js/lib/languages/xml'; // for HTML
+	import 'highlight.js/styles/github-dark.css';
+
+	// Register languages
+	hljs.registerLanguage('javascript', javascript);
+	hljs.registerLanguage('typescript', typescript);
+	hljs.registerLanguage('python', python);
+	hljs.registerLanguage('bash', bash);
+	hljs.registerLanguage('json', json);
+	hljs.registerLanguage('css', css);
+	hljs.registerLanguage('html', xml);
+	hljs.registerLanguage('xml', xml);
 
 	interface Message {
 		id: number;
 		role: 'user' | 'assistant';
 		content: string;
 	}
+
+	// Configure marked for better rendering
+	marked.setOptions({
+		breaks: true,
+		gfm: true
+	});
+
+	// Custom renderer for code blocks with syntax highlighting
+	const renderer = new marked.Renderer();
+	renderer.code = function ({ text, lang }: { text: string; lang?: string }) {
+		if (lang && hljs.getLanguage(lang)) {
+			try {
+				const highlighted = hljs.highlight(text, { language: lang }).value;
+				return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+			} catch (err) {
+				console.error('Highlight error:', err);
+			}
+		}
+		const highlighted = hljs.highlightAuto(text).value;
+		return `<pre><code class="hljs">${highlighted}</code></pre>`;
+	};
+
+	marked.use({ renderer });
 
 	let messages = $state<Message[]>([]);
 	let input = $state('');
@@ -62,12 +105,17 @@
 
 				for (const line of lines) {
 					if (line.startsWith('data: ')) {
-						const content = line.slice(6);
-						accumulatedContent += content;
+						try {
+							const content = JSON.parse(line.slice(6));
+							accumulatedContent += content;
 
-						messages = messages.map((m) =>
-							m.id === assistantMessageId ? { ...m, content: accumulatedContent } : m
-						);
+							messages = messages.map((m) =>
+								m.id === assistantMessageId ? { ...m, content: accumulatedContent } : m
+							);
+						} catch (e) {
+							// Skip invalid JSON
+							console.error('Error parsing streamed content:', e);
+						}
 					}
 				}
 			}
@@ -116,13 +164,32 @@
 					{#each messages as message (message.id)}
 						<div class="flex {message.role === 'user' ? 'justify-end' : 'justify-start'}">
 							<div
-								class="max-w-[80%] rounded-2xl px-4 py-2 {message.role === 'user'
-									? 'bg-secondary'
-									: 'bg-transparent'}"
+								class="max-w-[85%] rounded-2xl {message.role === 'user'
+									? 'bg-secondary px-4 py-2'
+									: 'px-1 py-2'}"
 							>
-								<p class="whitespace-pre-wrap">
-									{message.content}
-								</p>
+								{#if message.role === 'user'}
+									<p class="prose leading-7 whitespace-pre-wrap text-gray-900 dark:text-gray-100">
+										{message.content}
+									</p>
+								{:else}
+									<div
+										class="prose prose-md max-w-none dark:prose-invert
+										prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100
+										prose-p:leading-7 prose-p:text-gray-800 dark:prose-p:text-gray-200
+										prose-a:text-blue-600 prose-a:no-underline
+										hover:prose-a:underline dark:prose-a:text-blue-400
+										prose-blockquote:border-l-gray-300 prose-blockquote:text-gray-700 dark:prose-blockquote:border-l-gray-600 dark:prose-blockquote:text-gray-300
+										prose-strong:font-semibold prose-strong:text-gray-900
+										dark:prose-strong:text-gray-100 prose-code:rounded prose-code:bg-gray-100 prose-code:px-1.5
+										prose-code:py-0.5 prose-code:font-medium prose-code:text-pink-600
+										prose-code:before:content-[''] prose-code:after:content-['']
+										dark:prose-code:bg-gray-800 dark:prose-code:text-pink-400
+										prose-table:ms-2"
+									>
+										{@html marked(message.content)}
+									</div>
+								{/if}
 							</div>
 						</div>
 					{/each}

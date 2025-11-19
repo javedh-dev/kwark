@@ -1,6 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
-
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -113,9 +114,95 @@
 
 @layer base {
   * {
+    font-family: "Inter", sans-serif;
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Enhanced markdown code blocks */
+  .prose pre {
+    @apply rounded-lg shadow-sm my-4 bg-gray-900 dark:bg-gray-950;
+  }
+
+  .prose pre code {
+    @apply block overflow-x-auto p-4 text-sm leading-relaxed font-mono;
+  }
+
+  /* Inline code styling */
+  .prose :not(pre) > code {
+    @apply font-mono text-sm font-medium;
+  }
+
+  /* Better list spacing */
+  .prose ul, .prose ol {
+    @apply space-y-1.5 my-3;
+  }
+
+  .prose li {
+    @apply leading-7;
+  }
+
+  /* Paragraph spacing */
+  .prose p {
+    @apply my-3;
+  }
+
+  /* Heading spacing */
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    @apply mt-6 mb-3;
+  }
+
+  .prose h1 {
+    @apply text-2xl;
+  }
+
+  .prose h2 {
+    @apply text-xl;
+  }
+
+  .prose h3 {
+    @apply text-lg;
+  }
+
+  /* Table styling */
+  .prose table {
+    @apply w-full border-collapse my-4 text-sm;
+  }
+
+  .prose th {
+    @apply bg-gray-100 dark:bg-gray-800 font-semibold text-left px-4 py-2 border border-gray-200 dark:border-gray-700;
+  }
+
+  .prose td {
+    @apply m-4 border border-gray-200 dark:border-gray-700;
+  }
+
+  /* Horizontal rule */
+  .prose hr {
+    @apply border-gray-300 dark:border-gray-600 my-8;
+  }
+
+  /* Blockquote enhancement */
+  .prose blockquote {
+    @apply italic pl-4 py-2 my-4 border-l-4;
+  }
+
+  /* Syntax highlighting adjustments */
+  .prose .hljs {
+    @apply bg-transparent;
+  }
+
+  /* Link styling */
+  .prose a {
+    @apply transition-colors duration-200;
+  }
+
+  /* Image styling */
+  .prose img {
+    @apply rounded-lg my-4 shadow-sm;
   }
 }
