@@ -3,8 +3,14 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import AppSidebar from '$lib/components/sidebar/AppSidebar.svelte';
+	import { onMount } from 'svelte';
+	import { themeStore } from '$lib/stores/themeStore.svelte';
 
 	let { children } = $props();
+
+	onMount(() => {
+		themeStore.init();
+	});
 </script>
 
 <svelte:head>

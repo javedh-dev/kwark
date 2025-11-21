@@ -20,17 +20,15 @@
 	}
 </script>
 
-<div class="border-0 border-gray-200 bg-white px-4 py-4 dark:border-gray-800 dark:bg-gray-900">
+<div class="border-0 border-gray-200 bg-background px-4 py-4 dark:border-gray-800">
 	<div class="mx-auto max-w-3xl">
 		<form onsubmit={onSubmit}>
-			<div
-				class="flex w-full flex-col rounded-3xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
-			>
+			<div class="flex w-full flex-col rounded-3xl border border-input bg-secondary">
 				<Textarea
 					bind:value
 					onkeydown={handleKeydown}
 					placeholder="Message ChatGPT..."
-					class="resize-none border-none px-6 pt-4 pb-0 shadow-none focus-visible:ring-0"
+					class="resize-none border-none bg-transparent px-6 pt-4 pb-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
 					disabled={isLoading}
 				/>
 				<div class="flex items-center justify-between px-4 pb-4">

@@ -16,7 +16,7 @@
 	});
 </script>
 
-<div class="flex h-screen bg-white dark:bg-gray-900">
+<div class="flex h-screen bg-background">
 	<div class="flex flex-1 flex-col">
 		<Sidebar.Trigger class="m-2" />
 		<ChatMessages messages={chat.messages} isLoading={chat.isLoading} />
