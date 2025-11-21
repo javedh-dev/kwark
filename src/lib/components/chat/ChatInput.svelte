@@ -27,12 +27,12 @@
 				<Textarea
 					bind:value
 					onkeydown={handleKeydown}
-					placeholder="Message ChatGPT..."
+					placeholder="Ask anything..."
 					class="resize-none border-none bg-transparent px-6 pt-4 pb-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
 					disabled={isLoading}
 				/>
-				<div class="flex items-center justify-between px-4 pb-4">
-					<div>
+				<div class="flex items-center justify-between px-4 pb-2">
+					<div class="flex flex-row gap-2">
 						<Button type="button" size="sm" variant="outline" class="rounded-4xl" disabled>
 							<Paperclip class="h-5 w-5" /> Attach
 						</Button>
@@ -44,7 +44,7 @@
 						type="submit"
 						size="icon"
 						disabled={!value.trim() || isLoading}
-						class="h-9 w-9 rounded-full"
+						class="mb-2 h-9 w-9 rounded-full"
 					>
 						<ArrowUp class="h-5 w-5" />
 					</Button>

@@ -181,6 +181,29 @@ function createChatStore() {
             }
         },
 
+        async renameChat(chatId: string, newTitle: string) {
+            try {
+                await apiRequest(`/api/chats/${chatId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ title: newTitle })
+                });
+
+                chats = chats.map((chat) => {
+                    if (chat.id === chatId) {
+                        return {
+                            ...chat,
+                            title: newTitle,
+                            updatedAt: Date.now()
+                        };
+                    }
+                    return chat;
+                });
+            } catch (error) {
+                console.error('Error renaming chat:', error);
+                throw error;
+            }
+        },
+
         generateChatTitle(messages: Message[]): string {
             const firstUserMessage = messages.find((m) => m.role === 'user');
             if (!firstUserMessage) return 'New Chat';

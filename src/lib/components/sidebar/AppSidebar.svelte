@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { Hexagon, MessageCircle, SquarePen, Trash2 } from '@lucide/svelte';
+	import { Hexagon, MessageCircle, SquarePen, Trash2, Pencil } from '@lucide/svelte';
 	import Button from '../ui/button/button.svelte';
 	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
@@ -32,6 +32,36 @@
 			return 'Yesterday';
 		} else {
 			return `${days} days ago`;
+		}
+	}
+
+	let editingChatId = $state<string | null>(null);
+	let editTitle = $state('');
+
+	function startRename(chatId: string, currentTitle: string, event: MouseEvent) {
+		event.stopPropagation();
+		editingChatId = chatId;
+		editTitle = currentTitle;
+	}
+
+	async function saveRename(chatId: string) {
+		if (editTitle.trim()) {
+			await chatStore.renameChat(chatId, editTitle.trim());
+		}
+		editingChatId = null;
+		editTitle = '';
+	}
+
+	function cancelRename() {
+		editingChatId = null;
+		editTitle = '';
+	}
+
+	function handleKeydown(e: KeyboardEvent, chatId: string) {
+		if (e.key === 'Enter') {
+			saveRename(chatId);
+		} else if (e.key === 'Escape') {
+			cancelRename();
 		}
 	}
 </script>
@@ -72,17 +102,43 @@
 								tabindex="0"
 								onkeydown={(e) => e.key === 'Enter' && handleSelectChat(chat.id)}
 							>
-								<div class="flex items-center gap-2 overflow-hidden">
+								<div class="flex flex-1 items-center gap-2 overflow-hidden">
 									<MessageCircle class="h-4 w-4 shrink-0 text-gray-500" />
-									<span class="truncate">{chat.title}</span>
+									{#if editingChatId === chat.id}
+										<!-- svelte-ignore a11y_autofocus -->
+										<input
+											type="text"
+											bind:value={editTitle}
+											class="h-6 w-full min-w-0 rounded border border-gray-300 bg-white px-1 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+											onclick={(e) => e.stopPropagation()}
+											onkeydown={(e) => handleKeydown(e, chat.id)}
+											onblur={() => saveRename(chat.id)}
+											autofocus
+										/>
+									{:else}
+										<span class="truncate">{chat.title}</span>
+									{/if}
 								</div>
-								<button
-									class="opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-500"
-									onclick={(e) => handleDeleteChat(chat.id, e)}
-									aria-label="Delete chat"
-								>
-									<Trash2 class="h-4 w-4" />
-								</button>
+								{#if editingChatId !== chat.id}
+									<div
+										class="flex items-center opacity-0 transition-opacity group-hover:opacity-100"
+									>
+										<button
+											class="mr-1 p-1 hover:text-blue-500"
+											onclick={(e) => startRename(chat.id, chat.title, e)}
+											aria-label="Rename chat"
+										>
+											<Pencil class="h-3.5 w-3.5" />
+										</button>
+										<button
+											class="p-1 hover:text-red-500"
+											onclick={(e) => handleDeleteChat(chat.id, e)}
+											aria-label="Delete chat"
+										>
+											<Trash2 class="h-3.5 w-3.5" />
+										</button>
+									</div>
+								{/if}
 							</div>
 						{/each}
 					</div>
