@@ -14,6 +14,10 @@
 	import css from 'highlight.js/lib/languages/css';
 	import xml from 'highlight.js/lib/languages/xml'; // for HTML
 	import 'highlight.js/styles/github-dark.css';
+	import ChatSidebar from '$lib/components/ChatSidebar.svelte';
+	import { chatStore, type Message } from '$lib/stores/chatStore.svelte';
+	import { onMount } from 'svelte';
+	import * as Sidebar from '$lib/components/ui/sidebar';
 
 	// Register languages
 	hljs.registerLanguage('javascript', javascript);
@@ -24,12 +28,6 @@
 	hljs.registerLanguage('css', css);
 	hljs.registerLanguage('html', xml);
 	hljs.registerLanguage('xml', xml);
-
-	interface Message {
-		id: number;
-		role: 'user' | 'assistant';
-		content: string;
-	}
 
 	// Configure marked for better rendering
 	marked.setOptions({
@@ -58,6 +56,29 @@
 	let input = $state('');
 	let isLoading = $state(false);
 
+	// Load current chat messages when chat changes
+	$effect(() => {
+		const currentChat = chatStore.currentChat;
+		if (currentChat) {
+			messages = currentChat.messages;
+		} else {
+			messages = [];
+		}
+	});
+
+	// Initialize with first chat or create new one
+	onMount(() => {
+		if (chatStore.chats.length > 0 && !chatStore.currentChatId) {
+			chatStore.selectChat(chatStore.chats[0].id);
+		}
+	});
+
+	function handleNewChat() {
+		chatStore.createNewChat();
+		messages = [];
+		input = '';
+	}
+
 	async function sendMessage() {
 		if (!input.trim() || isLoading) return;
 
@@ -69,6 +90,9 @@
 
 		const assistantMessageId = messages.length + 1;
 		messages = [...messages, { id: assistantMessageId, role: 'assistant', content: '' }];
+
+		// Save user message immediately
+		chatStore.updateCurrentChat(messages.filter((m) => m.id !== assistantMessageId));
 
 		try {
 			const response = await fetch('/api/chat', {
@@ -119,6 +143,9 @@
 					}
 				}
 			}
+
+			// Save complete conversation
+			chatStore.updateCurrentChat(messages);
 		} catch (error) {
 			console.error('Error sending message:', error);
 			messages = messages.map((m) =>
@@ -126,6 +153,8 @@
 					? { ...m, content: 'Sorry, there was an error processing your request.' }
 					: m
 			);
+			// Save error message
+			chatStore.updateCurrentChat(messages);
 		} finally {
 			isLoading = false;
 		}
@@ -139,42 +168,43 @@
 	}
 </script>
 
-<div class="flex h-screen flex-col bg-white dark:bg-gray-900">
-	<!-- Header -->
-	<header
-		class="flex flex-row items-center gap-2 border-0 border-gray-200 px-4 py-3 dark:border-gray-800"
-	>
-		<img src="nanochat.svg" alt="" class="h-6 w-6" />
-		<h1 class="text-start text-xl font-medium text-gray-900 dark:text-gray-100">NanoChat</h1>
-	</header>
+<div class="flex h-screen bg-white dark:bg-gray-900">
+	<!-- Main Chat Area -->
+	<div class="flex flex-1 flex-col">
+		<!-- Header -->
+		<header class="flex flex-row items-center gap-2 px-4 py-3">
+			<Sidebar.Trigger />
+			<img src="nanochat.svg" alt="" class="h-6 w-6" />
+			<h1 class="text-start text-xl font-medium text-gray-900 dark:text-gray-100">NanoChat</h1>
+		</header>
 
-	<!-- Messages Area -->
-	<ScrollArea class="flex-1">
-		<div class="mx-auto max-w-3xl">
-			{#if messages.length === 0}
-				<div class="flex h-full items-center justify-center px-4 py-20">
-					<div class="text-center">
-						<h2 class="mb-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
-							How can I help you today?
-						</h2>
+		<!-- Messages Area -->
+		<ScrollArea class="flex-1">
+			<div class="mx-auto max-w-3xl">
+				{#if messages.length === 0}
+					<div class="flex h-full items-center justify-center px-4 py-20">
+						<div class="text-center">
+							<h2 class="mb-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
+								How can I help you today?
+							</h2>
+						</div>
 					</div>
-				</div>
-			{:else}
-				<div class="space-y-4 px-4 py-6">
-					{#each messages as message (message.id)}
-						<div class="flex {message.role === 'user' ? 'justify-end' : 'justify-start'}">
-							<div
-								class="max-w-[85%] rounded-2xl {message.role === 'user'
-									? 'bg-secondary px-4 py-2'
-									: 'px-1 py-2'}"
-							>
-								{#if message.role === 'user'}
-									<p class="prose leading-7 whitespace-pre-wrap text-gray-900 dark:text-gray-100">
-										{message.content}
-									</p>
-								{:else}
-									<div
-										class="prose prose-md max-w-none dark:prose-invert
+				{:else}
+					<div class="space-y-4 px-4 py-6">
+						{#each messages as message (message.id)}
+							<div class="flex {message.role === 'user' ? 'justify-end' : 'justify-start'}">
+								<div
+									class="max-w-[85%] rounded-2xl {message.role === 'user'
+										? 'bg-secondary px-4 py-2'
+										: 'px-1 py-2'}"
+								>
+									{#if message.role === 'user'}
+										<p class="prose leading-7 whitespace-pre-wrap text-gray-900 dark:text-gray-100">
+											{message.content}
+										</p>
+									{:else}
+										<div
+											class="prose-md prose max-w-none dark:prose-invert
 										prose-headings:font-semibold prose-headings:text-gray-900 dark:prose-headings:text-gray-100
 										prose-p:leading-7 prose-p:text-gray-800 dark:prose-p:text-gray-200
 										prose-a:text-blue-600 prose-a:no-underline
@@ -186,65 +216,66 @@
 										prose-code:before:content-[''] prose-code:after:content-['']
 										dark:prose-code:bg-gray-800 dark:prose-code:text-pink-400
 										prose-table:ms-2"
+										>
+											{@html marked(message.content)}
+										</div>
+									{/if}
+								</div>
+							</div>
+						{/each}
+						{#if isLoading}
+							<div class="group relative -mx-4 flex gap-4 px-4 py-6 dark:bg-gray-800/50">
+								<div class="flex shrink-0 items-center justify-center gap-2 rounded-full">
+									<span class="rounded-full bg-gray-200 p-2 text-sm font-medium dark:bg-gray-800"
+										>AI</span
 									>
-										{@html marked(message.content)}
-									</div>
-								{/if}
+									<Diamonds size="30" unit="px" duration="3s" color="black" />
+								</div>
 							</div>
-						</div>
-					{/each}
-					{#if isLoading}
-						<div class="group relative -mx-4 flex gap-4 px-4 py-6 dark:bg-gray-800/50">
-							<div class="flex shrink-0 items-center justify-center gap-2 rounded-full">
-								<span class="rounded-full bg-gray-200 p-2 text-sm font-medium dark:bg-gray-800"
-									>AI</span
-								>
-								<Diamonds size="30" unit="px" duration="3s" color="black" />
-							</div>
-						</div>
-					{/if}
-				</div>
-			{/if}
-		</div>
-	</ScrollArea>
-
-	<!-- Input Area -->
-	<div class="border-0 border-gray-200 bg-white px-4 py-4 dark:border-gray-800 dark:bg-gray-900">
-		<div class="mx-auto max-w-3xl">
-			<form onsubmit={sendMessage}>
-				<div
-					class="flex w-full flex-col rounded-3xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
-				>
-					<Textarea
-						bind:value={input}
-						onkeydown={handleKeydown}
-						placeholder="Message ChatGPT..."
-						class="resize-none border-none px-6 pt-4 pb-0 shadow-none focus-visible:ring-0"
-						disabled={isLoading}
-					/>
-					<div class="flex items-center justify-between px-4 pb-4">
-						<div>
-							<Button type="button" size="sm" variant="outline" class="rounded-4xl" disabled>
-								<Paperclip class="h-5 w-5" /> Attach
-							</Button>
-							<Button type="button" size="sm" variant="outline" class="rounded-4xl" disabled>
-								<Wrench class="h-5 w-5" /> Tools
-							</Button>
-						</div>
-						<Button
-							type="submit"
-							size="icon"
-							disabled={!input.trim() || isLoading}
-							class="h-9 w-9 rounded-full"
-						>
-							<ArrowUp class="h-5 w-5" />
-						</Button>
+						{/if}
 					</div>
-				</div>
-			</form>
-			<p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
-				LLMs can make mistakes. Check important info.
-			</p>
+				{/if}
+			</div>
+		</ScrollArea>
+
+		<!-- Input Area -->
+		<div class="border-0 border-gray-200 bg-white px-4 py-4 dark:border-gray-800 dark:bg-gray-900">
+			<div class="mx-auto max-w-3xl">
+				<form onsubmit={sendMessage}>
+					<div
+						class="flex w-full flex-col rounded-3xl border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+					>
+						<Textarea
+							bind:value={input}
+							onkeydown={handleKeydown}
+							placeholder="Message ChatGPT..."
+							class="resize-none border-none px-6 pt-4 pb-0 shadow-none focus-visible:ring-0"
+							disabled={isLoading}
+						/>
+						<div class="flex items-center justify-between px-4 pb-4">
+							<div>
+								<Button type="button" size="sm" variant="outline" class="rounded-4xl" disabled>
+									<Paperclip class="h-5 w-5" /> Attach
+								</Button>
+								<Button type="button" size="sm" variant="outline" class="rounded-4xl" disabled>
+									<Wrench class="h-5 w-5" /> Tools
+								</Button>
+							</div>
+							<Button
+								type="submit"
+								size="icon"
+								disabled={!input.trim() || isLoading}
+								class="h-9 w-9 rounded-full"
+							>
+								<ArrowUp class="h-5 w-5" />
+							</Button>
+						</div>
+					</div>
+				</form>
+				<p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
+					LLMs can make mistakes. Check important info.
+				</p>
+			</div>
 		</div>
 	</div>
 </div>

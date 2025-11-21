@@ -12,6 +12,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const apiKey = LLM_API_KEY || '';
 		const baseUrl = LLM_BASE_URL || 'https://api.openai.com/v1';
+		const llmModel = LLM_MODEL || 'gpt-oss-20b';
 
 		const response = await fetch(`${baseUrl}/chat/completions`, {
 			method: 'POST',
@@ -20,7 +21,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				Authorization: `Bearer ${apiKey}`
 			},
 			body: JSON.stringify({
-				model: LLM_MODEL,
+				model: llmModel,
 				messages,
 				stream: true
 			})
@@ -61,7 +62,9 @@ export const POST: RequestHandler = async ({ request }) => {
 									const content = parsed.choices?.[0]?.delta?.content;
 									if (content) {
 										// Use JSON.stringify to preserve newlines and special characters
-										controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(content)}\n\n`));
+										controller.enqueue(
+											new TextEncoder().encode(`data: ${JSON.stringify(content)}\n\n`)
+										);
 									}
 								} catch (e) {
 									console.error('Error parsing SSE data:', e);
