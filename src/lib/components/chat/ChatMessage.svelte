@@ -7,6 +7,18 @@
 	}
 
 	let { message }: Props = $props();
+
+	// Convert model ID to friendly label
+	function getModelLabel(model: string): string {
+		const modelMap: Record<string, string> = {
+			'openrouter/openai/gpt-oss-20b:free': 'GPT OSS 20B',
+			'openrouter/openai/gpt-4o-mini': 'GPT-4o Mini',
+			'openrouter/openai/gpt-4o': 'GPT-4o',
+			'openrouter/openai/gpt-4-turbo': 'GPT-4 Turbo',
+			'openrouter/openai/gpt-3.5-turbo': 'GPT-3.5 Turbo'
+		};
+		return modelMap[model] || model;
+	}
 </script>
 
 <div class="flex {message.role === 'user' ? 'justify-end' : 'justify-start'}">
@@ -20,6 +32,11 @@
 				{message.content}
 			</p>
 		{:else}
+			{#if message.model}
+				<div class="mb-1 text-xs text-muted-foreground">
+					{getModelLabel(message.model)}
+				</div>
+			{/if}
 			<div
 				class="prose-md prose max-w-none text-sm
 				dark:prose-invert prose-headings:font-semibold prose-headings:text-gray-900

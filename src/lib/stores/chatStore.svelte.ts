@@ -2,6 +2,7 @@ interface Message {
     id: number;
     role: 'user' | 'assistant';
     content: string;
+    model?: string;
 }
 
 interface Chat {
@@ -143,7 +144,8 @@ function createChatStore() {
                         method: 'POST',
                         body: JSON.stringify({
                             role: message.role,
-                            content: message.content
+                            content: message.content,
+                            ...(message.model && { model: message.model })
                         })
                     });
                 }

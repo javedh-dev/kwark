@@ -12,12 +12,13 @@ export const GET: RequestHandler = async ({ params }) => {
 
 // POST add message to chat
 export const POST: RequestHandler = async ({ params, request }) => {
-    const { role, content } = await request.json();
+    const { role, content, model } = await request.json();
 
     await db.addMessage({
         chatId: params.chatId,
         role,
-        content
+        content,
+        ...(model && { model })
     });
 
     const messages = await db.getMessages(params.chatId);

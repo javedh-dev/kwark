@@ -27,6 +27,7 @@ export const messages = sqliteTable('messages', {
         .references(() => chats.id, { onDelete: 'cascade' }),
     role: text('role', { enum: ['user', 'assistant'] }).notNull(),
     content: text('content').notNull(),
+    model: text('model'),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
 });
 

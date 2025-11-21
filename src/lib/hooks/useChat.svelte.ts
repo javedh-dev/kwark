@@ -77,7 +77,9 @@ export function useChat() {
                             accumulatedContent += content;
 
                             messages = messages.map((m) =>
-                                m.id === assistantMessageId ? { ...m, content: accumulatedContent } : m
+                                m.id === assistantMessageId 
+                                    ? { ...m, content: accumulatedContent, model: selectedModel } 
+                                    : m
                             );
                         } catch (e) {
                             console.error('Error parsing streamed content:', e, 'Line:', line);
