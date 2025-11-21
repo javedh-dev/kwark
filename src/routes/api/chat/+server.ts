@@ -4,7 +4,7 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { messages } = await request.json();
+		const { messages, model } = await request.json();
 
 		if (!messages || !Array.isArray(messages)) {
 			throw error(400, 'Invalid messages format');
@@ -12,7 +12,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const apiKey = LLM_API_KEY || '';
 		const baseUrl = LLM_BASE_URL || 'https://api.openai.com/v1';
-		const llmModel = LLM_MODEL || 'gpt-oss-20b';
+		const llmModel = model || LLM_MODEL || 'gpt-oss-20b';
 
 		const response = await fetch(`${baseUrl}/chat/completions`, {
 			method: 'POST',

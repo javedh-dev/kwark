@@ -5,6 +5,7 @@ export function useChat() {
     let input = $state('');
     let isLoading = $state(false);
     let currentChatId = $state<string | null>(null);
+    let selectedModel = $state('openrouter/openai/gpt-oss-20b:free');
 
     // Load current chat messages when chat changes
     $effect(() => {
@@ -44,7 +45,8 @@ export function useChat() {
                 body: JSON.stringify({
                     messages: messages
                         .filter((m) => m.id !== assistantMessageId)
-                        .map((m) => ({ role: m.role, content: m.content }))
+                        .map((m) => ({ role: m.role, content: m.content })),
+                    model: selectedModel
                 })
             });
 
@@ -111,6 +113,12 @@ export function useChat() {
         },
         get isLoading() {
             return isLoading;
+        },
+        get selectedModel() {
+            return selectedModel;
+        },
+        set selectedModel(value: string) {
+            selectedModel = value;
         },
         sendMessage
     };
