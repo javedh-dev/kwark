@@ -8,7 +8,8 @@
 
 	const chat = useChat();
 
-	onMount(() => {
+	onMount(async () => {
+		await chatStore.loadChats();
 		if (chatStore.chats.length > 0 && !chatStore.currentChatId) {
 			chatStore.selectChat(chatStore.chats[0].id);
 		}

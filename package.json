@@ -13,7 +13,10 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"db:generate": "drizzle-kit generate",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
@@ -26,10 +29,12 @@
 		"@tailwindcss/forms": "^0.5.10",
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.1.14",
+		"@types/better-sqlite3": "^7.6.13",
 		"@types/node": "^24",
 		"@vitest/browser-playwright": "^4.0.5",
 		"bits-ui": "^2.14.4",
 		"clsx": "^2.1.1",
+		"drizzle-kit": "^0.31.7",
 		"eslint": "^9.38.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.12.4",
@@ -52,6 +57,8 @@
 		"vitest-browser-svelte": "^2.0.1"
 	},
 	"dependencies": {
+		"better-sqlite3": "^12.4.5",
+		"drizzle-orm": "^0.44.7",
 		"highlight.js": "^11.11.1",
 		"marked": "^17.0.0"
 	}

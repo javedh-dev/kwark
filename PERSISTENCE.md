@@ -2,13 +2,13 @@
 
 ## Overview
 
-NanoChat now includes full chat persistence using browser localStorage. All conversations are automatically saved and restored when you return to the app.
+NanoChat includes full chat persistence using a local SQLite database. All conversations are automatically saved to the database and restored when you return to the app.
 
 ## Features
 
 ### Chat Management
 
-- **Auto-save**: All messages are automatically saved to localStorage as you chat
+- **Auto-save**: All messages are automatically saved to the database as you chat
 - **Multiple conversations**: Create and manage multiple chat sessions
 - **Chat history**: View all your previous conversations in the sidebar
 - **Smart titles**: Chat titles are automatically generated from the first user message
@@ -18,19 +18,24 @@ NanoChat now includes full chat persistence using browser localStorage. All conv
 
 - **New Chat button**: Start a fresh conversation at any time
 - **Chat list**: Browse all your saved conversations
-- **Timestamps**: See when each chat was last updated (Today, Yesterday, X days ago)
+- **Timestamps**: See when each chat was last updated
 - **Active indicator**: The current chat is highlighted
 - **Delete button**: Appears on hover for each chat
 
 ### Data Storage
 
-- All data is stored locally in your browser using localStorage
-- Storage key: `nanochat_conversations`
-- Each chat includes:
-  - Unique ID
-  - Title (auto-generated from first message)
-  - Full message history
-  - Creation and update timestamps
+- All data is stored in a local SQLite database
+- Database file: `data/nanochat.db`
+- ORM: Drizzle ORM
+- Driver: better-sqlite3
+
+### Database Schema
+
+The database consists of the following tables:
+
+- `users`: Stores user information (id, email, username, etc.)
+- `chats`: Stores chat sessions (id, user_id, title, timestamps)
+- `messages`: Stores messages for each chat (id, chat_id, role, content, timestamp)
 
 ## Usage
 
@@ -41,26 +46,29 @@ NanoChat now includes full chat persistence using browser localStorage. All conv
 
 ## Technical Details
 
-### Files Added
+### Files Added/Modified
 
-- `src/lib/stores/chatStore.svelte.ts` - Svelte 5 runes-based store for chat state management
-- `src/lib/components/ChatSidebar.svelte` - Sidebar component for chat navigation
-
-### Files Modified
-
-- `src/routes/+page.svelte` - Integrated chat store and sidebar
-- `src/app.d.ts` - Updated environment variable types
+- `src/lib/db/schema.ts` - Drizzle schema definitions
+- `src/lib/db/sqlite.ts` - SQLite adapter implementation
+- `src/lib/stores/chatStore.svelte.ts` - Svelte 5 runes-based store for chat state management interacting with the API
+- `src/routes/api/chats/...` - API endpoints for chat management
 
 ### Store API
 
 The `chatStore` provides the following methods:
 
-- `createNewChat()` - Create a new empty chat
+- `loadChats()` - Fetch all chats from the API
+- `createNewChat()` - Create a new empty chat via API
 - `selectChat(chatId)` - Switch to a specific chat
-- `updateCurrentChat(messages)` - Save messages to current chat
-- `deleteChat(chatId)` - Remove a chat
-- `clearAllChats()` - Delete all conversations
+- `updateCurrentChat(messages)` - Save messages to current chat via API
+- `deleteChat(chatId)` - Remove a chat via API
 
-## Browser Compatibility
+### API Endpoints
 
-Works in all modern browsers that support localStorage (all major browsers since 2010).
+- `GET /api/chats` - Get all chats
+- `POST /api/chats` - Create a new chat
+- `GET /api/chats/:id` - Get a specific chat
+- `PATCH /api/chats/:id` - Update a chat
+- `DELETE /api/chats/:id` - Delete a chat
+- `GET /api/chats/:id/messages` - Get messages for a chat
+- `POST /api/chats/:id/messages` - Add a message to a chat
