@@ -20,8 +20,8 @@
 	}
 </script>
 
-<div class="border-0 border-gray-200 bg-background px-4 py-4 dark:border-gray-800">
-	<div class="mx-auto max-w-3xl">
+<div class="border-0 border-gray-200 bg-background pb-2 dark:border-gray-800">
+	<div class="mx-auto max-w-full">
 		<form onsubmit={onSubmit}>
 			<div class="flex w-full flex-col rounded-3xl border border-input bg-secondary">
 				<Textarea
@@ -51,8 +51,8 @@
 				</div>
 			</div>
 		</form>
-		<p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
+		<!-- <p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
 			LLMs can make mistakes. Check important info.
-		</p>
+		</p> -->
 	</div>
 </div>

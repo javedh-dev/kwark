@@ -17,14 +17,16 @@
 </script>
 
 <div class="flex h-screen bg-background">
-	<div class="flex flex-1 flex-col">
-		<Sidebar.Trigger class="m-2" />
+	<div class="flex flex-1 flex-col overflow-hidden px-8">
+		<Sidebar.Trigger class="m-2 flex-shrink-0" />
 		<ChatMessages messages={chat.messages} isLoading={chat.isLoading} />
-		<ChatInput
-			bind:value={chat.input}
-			isLoading={chat.isLoading}
-			onSubmit={chat.sendMessage}
-			onInput={(value) => (chat.input = value)}
-		/>
+		<div class="flex-shrink-0">
+			<ChatInput
+				bind:value={chat.input}
+				isLoading={chat.isLoading}
+				onSubmit={chat.sendMessage}
+				onInput={(value: any) => (chat.input = value)}
+			/>
+		</div>
 	</div>
 </div>
