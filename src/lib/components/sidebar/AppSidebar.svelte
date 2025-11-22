@@ -1,6 +1,14 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { Hexagon, MessageCircle, SquarePen, Trash2, Pencil, ChevronDown } from '@lucide/svelte';
+	import {
+		Hexagon,
+		MessageCircle,
+		SquarePen,
+		Trash2,
+		Pencil,
+		ChevronDown,
+		CircleOff
+	} from '@lucide/svelte';
 	import Button from '../ui/button/button.svelte';
 	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
@@ -99,10 +107,10 @@
 					<Sidebar.GroupContent>
 						{#if chatStore.chats.length === 0}
 							<div
-								class="flex h-full items-center justify-center gap-4 px-3 py-2 text-center text-sm text-gray-500 dark:text-gray-400"
+								class="flex h-full items-center justify-center gap-2 px-3 py-2 text-center text-sm text-gray-500 dark:text-gray-400"
 							>
-								<!-- <CircleDashed class="h-5 w-5" /> -->
-								It's empty here
+								<CircleOff class="h-4 w-4" />
+								No Chats Found
 							</div>
 						{:else}
 							<div class="space-y-1">
