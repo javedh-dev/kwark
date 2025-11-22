@@ -11,6 +11,19 @@
 	}
 
 	let { messages, isLoading }: Props = $props();
+	let messagesEndRef: HTMLDivElement | undefined = $state();
+
+	// Auto-scroll to bottom when messages change or loading state changes
+	$effect(() => {
+		// Track dependencies
+		messages.length;
+		isLoading;
+
+		// Scroll to bottom
+		if (messagesEndRef) {
+			messagesEndRef.scrollIntoView({ behavior: 'smooth', block: 'end' });
+		}
+	});
 </script>
 
 <div class="min-h-0 flex-1">
@@ -26,6 +39,8 @@
 					{#if isLoading}
 						<LoadingIndicator />
 					{/if}
+					<!-- Invisible element to scroll to -->
+					<div bind:this={messagesEndRef}></div>
 				</div>
 			{/if}
 		</div>
