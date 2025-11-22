@@ -19,10 +19,9 @@
 	const currentLabel = $derived(models.find((m) => m.value === value)?.label || value);
 </script>
 
-<div class="flex items-center gap-3 border-b border-border px-8 py-3">
-	<span class="text-sm font-medium text-muted-foreground">Model:</span>
+<div class="flex items-center gap-3 p-2">
 	<Select.Root type="single" bind:value>
-		<Select.Trigger class="w-[200px]">
+		<Select.Trigger class="w-auto border-none shadow-none" placeholder="Select a model">
 			{currentLabel}
 		</Select.Trigger>
 		<Select.Content>

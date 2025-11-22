@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import '$lib/utils/markdown';
 	import * as Sidebar from '$lib/components/ui/sidebar/';
+	import AppHeader from '$lib/components/AppHeader.svelte';
 
 	const chat = useChat();
 
@@ -18,10 +19,9 @@
 
 <div class="flex h-screen bg-background">
 	<div class="flex flex-1 flex-col overflow-hidden px-8">
-		<Sidebar.Trigger class="m-2 flex-shrink-0" />
-		<ModelSelector bind:value={chat.selectedModel} />
+		<AppHeader />
 		<ChatMessages messages={chat.messages} isLoading={chat.isLoading} />
-		<div class="flex-shrink-0">
+		<div class="shrink-0">
 			<ChatInput
 				bind:value={chat.input}
 				isLoading={chat.isLoading}

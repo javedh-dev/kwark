@@ -1,9 +1,19 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { Hexagon, MessageCircle, SquarePen, Trash2, Pencil } from '@lucide/svelte';
+	import {
+		Hexagon,
+		MessageCircle,
+		SquarePen,
+		Trash2,
+		Pencil,
+		CircleDot,
+		CircleDashed,
+		MessageSquare
+	} from '@lucide/svelte';
 	import Button from '../ui/button/button.svelte';
 	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import EmptyState from '../chat/EmptyState.svelte';
 
 	function handleNewChat() {
 		chatStore.createNewChat();
@@ -83,17 +93,20 @@
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<Sidebar.Group>
-			<Sidebar.GroupLabel>Chats</Sidebar.GroupLabel>
+			<Sidebar.GroupLabel class="flex items-center gap-2">Chats</Sidebar.GroupLabel>
 			<Sidebar.GroupContent>
 				{#if chatStore.chats.length === 0}
-					<div class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
-						No chats yet. Start a new conversation!
+					<div
+						class="flex h-full items-center justify-center gap-4 px-3 py-2 text-center text-sm text-gray-500 dark:text-gray-400"
+					>
+						<!-- <CircleDashed class="h-5 w-5" /> -->
+						It's empty here
 					</div>
 				{:else}
 					<div class="space-y-1">
 						{#each chatStore.chats as chat (chat.id)}
 							<div
-								class="group flex w-full cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 {chatStore.currentChatId ===
+								class="group flex w-full cursor-pointer items-center justify-between rounded-md px-3 py-1 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 {chatStore.currentChatId ===
 								chat.id
 									? 'bg-gray-100 dark:bg-gray-800'
 									: ''}"
