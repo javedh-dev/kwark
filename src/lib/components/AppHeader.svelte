@@ -1,11 +1,9 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/';
 	import { ModelSelector } from '$lib/components/chat';
-	import { useChat } from '$lib/hooks/useChat.svelte';
+	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import { goto } from '$app/navigation';
 	import { LogOut } from '@lucide/svelte';
-
-	const chat = useChat();
 
 	let { user } = $props<{ user?: { id: string; email: string; username?: string | null } }>();
 
@@ -22,7 +20,7 @@
 <div class="flex w-full flex-row items-center justify-between">
 	<div class="flex flex-row items-center">
 		<Sidebar.Trigger class="shrink-0" />
-		<ModelSelector bind:value={chat.selectedModel} />
+		<ModelSelector bind:value={chatStore.selectedModel} />
 	</div>
 
 	{#if user}

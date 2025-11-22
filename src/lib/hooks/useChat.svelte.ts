@@ -5,7 +5,6 @@ export function useChat() {
 	let input = $state('');
 	let isLoading = $state(false);
 	let currentChatId = $state<string | null>(null);
-	let selectedModel = $state('');
 
 	// Load current chat messages when chat changes
 	$effect(() => {
@@ -46,7 +45,7 @@ export function useChat() {
 					messages: messages
 						.filter((m) => m.id !== assistantMessageId)
 						.map((m) => ({ role: m.role, content: m.content })),
-					model: selectedModel
+					model: chatStore.selectedModel
 				})
 			});
 
@@ -78,7 +77,7 @@ export function useChat() {
 
 							messages = messages.map((m) =>
 								m.id === assistantMessageId
-									? { ...m, content: accumulatedContent, model: selectedModel }
+									? { ...m, content: accumulatedContent, model: chatStore.selectedModel }
 									: m
 							);
 						} catch (e) {
@@ -117,10 +116,10 @@ export function useChat() {
 			return isLoading;
 		},
 		get selectedModel() {
-			return selectedModel;
+			return chatStore.selectedModel;
 		},
 		set selectedModel(value: string) {
-			selectedModel = value;
+			chatStore.selectedModel = value;
 		},
 		sendMessage
 	};

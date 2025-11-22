@@ -34,6 +34,7 @@ function createChatStore() {
 	let chats = $state<Chat[]>([]);
 	let currentChatId = $state<string | null>(null);
 	let isLoading = $state(false);
+	let selectedModel = $state('');
 
 	return {
 		get chats() {
@@ -47,6 +48,12 @@ function createChatStore() {
 		},
 		get isLoading() {
 			return isLoading;
+		},
+		get selectedModel() {
+			return selectedModel;
+		},
+		set selectedModel(value: string) {
+			selectedModel = value;
 		},
 
 		async loadChats() {
