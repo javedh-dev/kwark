@@ -15,7 +15,7 @@
 
 <div class="min-h-0 flex-1">
 	<ScrollArea class="h-full">
-		<div class="mx-auto max-w-full">
+		<div class="mx-auto h-full max-w-5xl">
 			{#if messages.length === 0}
 				<EmptyState />
 			{:else}

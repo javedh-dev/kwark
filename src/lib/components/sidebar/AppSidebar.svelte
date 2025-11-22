@@ -1,19 +1,10 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import {
-		Hexagon,
-		MessageCircle,
-		SquarePen,
-		Trash2,
-		Pencil,
-		CircleDot,
-		CircleDashed,
-		MessageSquare
-	} from '@lucide/svelte';
+	import { Hexagon, MessageCircle, SquarePen, Trash2, Pencil, ChevronDown } from '@lucide/svelte';
 	import Button from '../ui/button/button.svelte';
 	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
-	import EmptyState from '../chat/EmptyState.svelte';
+	import * as Collapsible from '../ui/collapsible';
 
 	function handleNewChat() {
 		chatStore.createNewChat();
@@ -92,72 +83,85 @@
 		</div>
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<Sidebar.Group>
-			<Sidebar.GroupLabel class="flex items-center gap-2">Chats</Sidebar.GroupLabel>
-			<Sidebar.GroupContent>
-				{#if chatStore.chats.length === 0}
-					<div
-						class="flex h-full items-center justify-center gap-4 px-3 py-2 text-center text-sm text-gray-500 dark:text-gray-400"
+		<Collapsible.Root open class="group/collapsible">
+			<Sidebar.Group>
+				<Collapsible.Trigger>
+					<Sidebar.GroupLabel
+						class="flex cursor-pointer items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800"
 					>
-						<!-- <CircleDashed class="h-5 w-5" /> -->
-						It's empty here
-					</div>
-				{:else}
-					<div class="space-y-1">
-						{#each chatStore.chats as chat (chat.id)}
+						Chats
+						<ChevronDown
+							class="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180"
+						/>
+					</Sidebar.GroupLabel>
+				</Collapsible.Trigger>
+				<Collapsible.Content>
+					<Sidebar.GroupContent>
+						{#if chatStore.chats.length === 0}
 							<div
-								class="group flex w-full cursor-pointer items-center justify-between rounded-md px-3 py-1 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 {chatStore.currentChatId ===
-								chat.id
-									? 'bg-gray-100 dark:bg-gray-800'
-									: ''}"
-								onclick={() => handleSelectChat(chat.id)}
-								role="button"
-								tabindex="0"
-								onkeydown={(e) => e.key === 'Enter' && handleSelectChat(chat.id)}
+								class="flex h-full items-center justify-center gap-4 px-3 py-2 text-center text-sm text-gray-500 dark:text-gray-400"
 							>
-								<div class="flex flex-1 items-center gap-2 overflow-hidden">
-									<MessageCircle class="h-4 w-4 shrink-0 text-gray-500" />
-									{#if editingChatId === chat.id}
-										<!-- svelte-ignore a11y_autofocus -->
-										<input
-											type="text"
-											bind:value={editTitle}
-											class="h-6 w-full min-w-0 rounded border border-gray-300 bg-white px-1 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-											onclick={(e) => e.stopPropagation()}
-											onkeydown={(e) => handleKeydown(e, chat.id)}
-											onblur={() => saveRename(chat.id)}
-											autofocus
-										/>
-									{:else}
-										<span class="truncate">{chat.title}</span>
-									{/if}
-								</div>
-								{#if editingChatId !== chat.id}
-									<div
-										class="flex items-center opacity-0 transition-opacity group-hover:opacity-100"
-									>
-										<button
-											class="mr-1 p-1 hover:text-blue-500"
-											onclick={(e) => startRename(chat.id, chat.title, e)}
-											aria-label="Rename chat"
-										>
-											<Pencil class="h-3.5 w-3.5" />
-										</button>
-										<button
-											class="p-1 hover:text-red-500"
-											onclick={(e) => handleDeleteChat(chat.id, e)}
-											aria-label="Delete chat"
-										>
-											<Trash2 class="h-3.5 w-3.5" />
-										</button>
-									</div>
-								{/if}
+								<!-- <CircleDashed class="h-5 w-5" /> -->
+								It's empty here
 							</div>
-						{/each}
-					</div>
-				{/if}
-			</Sidebar.GroupContent>
-		</Sidebar.Group>
+						{:else}
+							<div class="space-y-1">
+								{#each chatStore.chats as chat (chat.id)}
+									<div
+										class="group flex w-full cursor-pointer items-center justify-between rounded-md px-3 py-1 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 {chatStore.currentChatId ===
+										chat.id
+											? 'bg-gray-100 dark:bg-gray-800'
+											: ''}"
+										onclick={() => handleSelectChat(chat.id)}
+										role="button"
+										tabindex="0"
+										onkeydown={(e) => e.key === 'Enter' && handleSelectChat(chat.id)}
+									>
+										<div class="flex flex-1 items-center gap-2 overflow-hidden">
+											<MessageCircle class="h-4 w-4 shrink-0 text-gray-500" />
+											{#if editingChatId === chat.id}
+												<!-- svelte-ignore a11y_autofocus -->
+												<input
+													type="text"
+													bind:value={editTitle}
+													class="h-6 w-full min-w-0 rounded border border-gray-300 bg-white px-1 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+													onclick={(e) => e.stopPropagation()}
+													onkeydown={(e) => handleKeydown(e, chat.id)}
+													onblur={() => saveRename(chat.id)}
+													autofocus
+												/>
+											{:else}
+												<span class="truncate">{chat.title}</span>
+											{/if}
+										</div>
+										{#if editingChatId !== chat.id}
+											<div
+												class="flex items-center opacity-0 transition-opacity group-hover:opacity-100"
+											>
+												<button
+													class="mr-1 p-1 hover:text-blue-500"
+													onclick={(e) => startRename(chat.id, chat.title, e)}
+													aria-label="Rename chat"
+												>
+													<Pencil class="h-3.5 w-3.5" />
+												</button>
+												<button
+													class="p-1 hover:text-red-500"
+													onclick={(e) => handleDeleteChat(chat.id, e)}
+													aria-label="Delete chat"
+												>
+													<Trash2 class="h-3.5 w-3.5" />
+												</button>
+											</div>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</Sidebar.GroupContent>
+				</Collapsible.Content>
+			</Sidebar.Group>
+		</Collapsible.Root>
 	</Sidebar.Content>
 
 	<Sidebar.Footer>

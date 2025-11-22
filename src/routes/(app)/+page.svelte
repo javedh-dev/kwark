@@ -4,10 +4,11 @@
 	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import { onMount } from 'svelte';
 	import '$lib/utils/markdown';
-	import * as Sidebar from '$lib/components/ui/sidebar/';
 	import AppHeader from '$lib/components/AppHeader.svelte';
 
 	const chat = useChat();
+
+	let { data } = $props();
 
 	onMount(async () => {
 		await chatStore.loadChats();
@@ -19,7 +20,7 @@
 
 <div class="flex h-screen bg-background">
 	<div class="flex flex-1 flex-col overflow-hidden px-8">
-		<AppHeader />
+		<AppHeader user={data.user} />
 		<ChatMessages messages={chat.messages} isLoading={chat.isLoading} />
 		<div class="shrink-0">
 			<ChatInput

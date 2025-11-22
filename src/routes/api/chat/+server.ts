@@ -2,7 +2,11 @@ import { LLM_API_KEY, LLM_BASE_URL, LLM_MODEL } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+	if (!locals.user) {
+		throw error(401, 'Unauthorized');
+	}
+
 	try {
 		const { messages, model } = await request.json();
 

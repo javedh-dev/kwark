@@ -24,11 +24,11 @@
 <div class="flex {message.role === 'user' ? 'justify-end' : 'justify-start'}">
 	<div
 		class="max-w-[85%] rounded-xl {message.role === 'user'
-			? 'bg-secondary px-4 py-1.5'
+			? 'bg-secondary/40 px-4 py-1.5'
 			: 'px-0.5 py-1'}"
 	>
 		{#if message.role === 'user'}
-			<p class="prose text-sm leading-7 whitespace-pre-wrap text-gray-900 dark:text-gray-100">
+			<p class="prose text-base leading-7 whitespace-pre-wrap text-gray-900 dark:text-gray-50">
 				{message.content}
 			</p>
 		{:else}
@@ -38,7 +38,7 @@
 				</div>
 			{/if}
 			<div
-				class="prose-md prose max-w-none text-sm
+				class="prose-md prose max-w-none text-base
 				dark:prose-invert prose-headings:font-semibold prose-headings:text-gray-900
 				dark:prose-headings:text-gray-100 prose-p:leading-7 prose-p:text-gray-800
 				dark:prose-p:text-gray-200 prose-a:text-blue-600

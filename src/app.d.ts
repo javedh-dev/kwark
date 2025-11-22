@@ -3,7 +3,10 @@
 declare global {
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			user: import('$lib/db/schema').User | null;
+			session: import('$lib/db/schema').Session | null;
+		}
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}
@@ -16,4 +19,4 @@ declare module '$env/static/private' {
 	export const LLM_MODEL: string;
 }
 
-export { };
+export {};
