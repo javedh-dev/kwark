@@ -1,14 +1,33 @@
 <script>
 	import { Hexagon } from '@lucide/svelte';
 	import { useChat } from '$lib/hooks/useChat.svelte';
+	import { onMount } from 'svelte';
 
-	const models = [
-		{ value: 'openrouter/openai/gpt-oss-20b:free', label: 'GPT OSS 20B' },
-		{ value: 'openrouter/openai/gpt-4o-mini', label: 'GPT-4o Mini' },
-		{ value: 'openrouter/openai/gpt-4o', label: 'GPT-4o' },
-		{ value: 'openrouter/openai/gpt-4-turbo', label: 'GPT-4 Turbo' },
-		{ value: 'openrouter/openai/gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
+	// Fallback models if API fails
+	const fallbackModels = [
+		{ value: 'openai/gpt-oss-20b:free', label: 'GPT OSS 20B' },
+		{ value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini' },
+		{ value: 'openai/gpt-4o', label: 'GPT-4o' },
+		{ value: 'openai/gpt-4-turbo', label: 'GPT-4 Turbo' },
+		{ value: 'openai/gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
 	];
+
+	let models = $state(fallbackModels);
+
+	// Fetch models from API
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/models');
+			if (response.ok) {
+				const data = await response.json();
+				models = data;
+			}
+		} catch (error) {
+			console.error('Failed to fetch models:', error);
+			// Use fallback models on error
+		}
+	});
+
 	const chat = useChat();
 	let selectedModel = $derived(chat.selectedModel || 'gpt-3.5-turbo');
 	const currentModelLabel = $derived(models.find((m) => m.value === selectedModel)?.label);

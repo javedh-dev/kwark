@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const apiKey = LLM_API_KEY || '';
 		const baseUrl = LLM_BASE_URL || 'https://api.openai.com/v1';
-		const llmModel = model || LLM_MODEL || 'gpt-oss-20b';
+		const llmModel = model || LLM_MODEL || '';
 
 		const response = await fetch(`${baseUrl}/chat/completions`, {
 			method: 'POST',

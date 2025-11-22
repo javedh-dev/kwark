@@ -3,16 +3,13 @@ import { getDatabase } from '$lib/db';
 import { mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { parseSessionToken, verifySessionSecret } from '$lib/server/auth';
+import { DATABASE_PATH } from '$env/static/private';
 
-// Initialize database on server start
-if (!existsSync('./data')) {
-	await mkdir('./data', { recursive: true });
+if (!existsSync(DATABASE_PATH)) {
+	await mkdir(DATABASE_PATH, { recursive: true });
 }
 
-// Initialize database connection
-const db = getDatabase('sqlite');
-
-console.log('✓ Database initialized');
+const db = getDatabase();
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// Default to no auth

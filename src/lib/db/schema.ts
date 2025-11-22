@@ -1,6 +1,5 @@
 import { sqliteTable, text, integer, blob } from 'drizzle-orm/sqlite-core';
 
-// Users table - ready for auth implementation
 export const users = sqliteTable('users', {
 	id: text('id').primaryKey(),
 	email: text('email').notNull().unique(),
@@ -10,7 +9,6 @@ export const users = sqliteTable('users', {
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 });
 
-// Sessions table for authentication
 export const sessions = sqliteTable('sessions', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
@@ -21,7 +19,6 @@ export const sessions = sqliteTable('sessions', {
 	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
 });
 
-// Chats table
 export const chats = sqliteTable('chats', {
 	id: text('id').primaryKey(),
 	userId: text('user_id')
@@ -32,7 +29,6 @@ export const chats = sqliteTable('chats', {
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 });
 
-// Messages table
 export const messages = sqliteTable('messages', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
 	chatId: text('chat_id')

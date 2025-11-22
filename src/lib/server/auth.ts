@@ -7,31 +7,31 @@ const SESSION_EXPIRY_DAYS = 30;
  * Generate a secure random ID for sessions
  * Uses human-readable alphabet (a-z, 0-9) with 120 bits of entropy
  */
-export function generateSessionId(): string {
+function generateRandomString(length: number): string {
 	const alphabet = 'abcdefghijkmnpqrstuvwxyz23456789';
-	const bytes = new Uint8Array(24);
+	const bytes = new Uint8Array(length);
 	crypto.getRandomValues(bytes);
 
-	let id = '';
+	let result = '';
 	for (let i = 0; i < bytes.length; i++) {
-		id += alphabet[bytes[i] >> 3];
+		result += alphabet[bytes[i] >> 3];
 	}
-	return id;
+	return result;
+}
+
+/**
+ * Generate a secure random ID for sessions
+ * Uses human-readable alphabet (a-z, 0-9) with 120 bits of entropy
+ */
+export function generateSessionId(): string {
+	return generateRandomString(24);
 }
 
 /**
  * Generate a secure random secret for session tokens
  */
 export function generateSessionSecret(): string {
-	const alphabet = 'abcdefghijkmnpqrstuvwxyz23456789';
-	const bytes = new Uint8Array(24);
-	crypto.getRandomValues(bytes);
-
-	let secret = '';
-	for (let i = 0; i < bytes.length; i++) {
-		secret += alphabet[bytes[i] >> 3];
-	}
-	return secret;
+	return generateRandomString(24);
 }
 
 /**
@@ -119,14 +119,7 @@ export async function verifyPassword(hash: string, password: string): Promise<bo
  * Generate a unique user ID
  */
 export function generateUserId(): string {
-	const alphabet = 'abcdefghijkmnpqrstuvwxyz23456789';
-	const bytes = new Uint8Array(16);
-	crypto.getRandomValues(bytes);
-
-	let id = 'user_';
-	for (let i = 0; i < bytes.length; i++) {
-		id += alphabet[bytes[i] >> 3];
-	}
+	let id = 'user_' + generateRandomString(16);
 	return id;
 }
 

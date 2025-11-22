@@ -17,6 +17,7 @@ declare module '$env/static/private' {
 	export const LLM_API_KEY: string;
 	export const LLM_BASE_URL: string;
 	export const LLM_MODEL: string;
+	export const DATABASE_PATH: string;
 }
 
 export {};

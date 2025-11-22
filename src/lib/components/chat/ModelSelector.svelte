@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as Select from '$lib/components/ui/select';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		value: string;
@@ -7,16 +8,28 @@
 
 	let { value = $bindable() }: Props = $props();
 
-	const models = [
-		{ value: 'openrouter/openai/gpt-oss-20b:free', label: 'GPT OSS 20B' },
-		{ value: 'openrouter/openai/gpt-4o-mini', label: 'GPT-4o Mini' },
-		{ value: 'openrouter/openai/gpt-4o', label: 'GPT-4o' },
-		{ value: 'openrouter/openai/gpt-4-turbo', label: 'GPT-4 Turbo' },
-		{ value: 'openrouter/openai/gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
-	];
+	let models = $state<any>([]);
+	let loading = $state(true);
+
+	// Fetch models from API
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/models');
+			if (response.ok) {
+				const data = await response.json();
+				models = data;
+				value = models[0].value;
+			}
+		} catch (error) {
+			console.error('Failed to fetch models:', error);
+			// Use fallback models on error
+		} finally {
+			loading = false;
+		}
+	});
 
 	// Get current label for display
-	const currentLabel = $derived(models.find((m) => m.value === value)?.label || value);
+	const currentLabel = $derived(models.find((m: any) => m.value === value)?.label || value);
 </script>
 
 <div class="flex items-center gap-3 p-2">

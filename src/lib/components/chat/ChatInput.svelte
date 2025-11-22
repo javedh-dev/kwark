@@ -71,8 +71,6 @@
 				</div>
 			</div>
 		</form>
-		<!-- <p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
-			LLMs can make mistakes. Check important info.
-		</p> -->
+
 	</div>
 </div>

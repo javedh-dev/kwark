@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { marked } from 'marked';
 	import type { Message } from '$lib/stores/chatStore.svelte';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		message: Message;
@@ -8,15 +9,31 @@
 
 	let { message }: Props = $props();
 
+	// Fallback model map - should match server-side MODEL_LABELS
+	const fallbackModelMap: Record<string, string> = {};
+
+	let modelMap = $state<Record<string, string>>(fallbackModelMap);
+
+	// Fetch models from API and build the map
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/models');
+			if (response.ok) {
+				const data = await response.json();
+				const newModelMap: Record<string, string> = {};
+				data.forEach((model: { value: string; label: string }) => {
+					newModelMap[model.value] = model.label;
+				});
+				modelMap = newModelMap;
+			}
+		} catch (error) {
+			console.error('Failed to fetch models:', error);
+			// Use fallback model map on error
+		}
+	});
+
 	// Convert model ID to friendly label
 	function getModelLabel(model: string): string {
-		const modelMap: Record<string, string> = {
-			'openrouter/openai/gpt-oss-20b:free': 'GPT OSS 20B',
-			'openrouter/openai/gpt-4o-mini': 'GPT-4o Mini',
-			'openrouter/openai/gpt-4o': 'GPT-4o',
-			'openrouter/openai/gpt-4-turbo': 'GPT-4 Turbo',
-			'openrouter/openai/gpt-3.5-turbo': 'GPT-3.5 Turbo'
-		};
 		return modelMap[model] || model;
 	}
 </script>

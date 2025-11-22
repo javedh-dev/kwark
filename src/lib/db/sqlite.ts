@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, lt } from 'drizzle-orm';
 import * as schema from './schema';
 import type { DatabaseAdapter, ChatWithMessages, MessageData, UserData } from './types';
 
@@ -114,11 +114,13 @@ export class SQLiteAdapter implements DatabaseAdapter {
 		chatId: string;
 		role: 'user' | 'assistant';
 		content: string;
+		model?: string;
 	}): Promise<void> {
 		await this.db.insert(schema.messages).values({
 			chatId: message.chatId,
 			role: message.role,
 			content: message.content,
+			model: message.model,
 			createdAt: new Date()
 		});
 
@@ -178,7 +180,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
 
 	async deleteExpiredSessions(): Promise<void> {
 		const now = new Date();
-		await this.db.delete(schema.sessions).where(eq(schema.sessions.expiresAt, now));
+		await this.db.delete(schema.sessions).where(lt(schema.sessions.expiresAt, now));
 	}
 
 	async getUserSessions(userId: string): Promise<(typeof schema.sessions.$inferSelect)[]> {
