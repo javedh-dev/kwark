@@ -2,6 +2,7 @@
 	import { Hexagon } from '@lucide/svelte';
 	import { useChat } from '$lib/hooks/useChat.svelte';
 	import { onMount } from 'svelte';
+	import Logo from '../icons/Logo.svelte';
 
 	// Fallback models if API fails
 	const fallbackModels = [
@@ -36,8 +37,8 @@
 <div class="flex h-full items-center justify-start px-4 align-middle">
 	<div class="text-start">
 		<h2 class="mb-2 flex flex-col items-start gap-6 text-2xl text-gray-900 dark:text-gray-100">
-			<div class="flex h-12 w-12 items-center justify-center rounded-lg border border-gray-200">
-				<img src="/logo.svg" alt="Kwark Logo" class="h-8 w-8" />
+			<div class="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200">
+				<Logo class="h-8 w-8 text-gray-700 dark:text-white" />
 			</div>
 			<div class="flex flex-col gap-1">
 				{currentModelLabel}

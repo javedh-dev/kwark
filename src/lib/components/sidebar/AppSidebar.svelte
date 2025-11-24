@@ -13,6 +13,7 @@
 	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import * as Collapsible from '../ui/collapsible';
+	import Logo from '$lib/components/icons/Logo.svelte';
 
 	function handleNewChat() {
 		chatStore.createNewChat();
@@ -63,8 +64,8 @@
 <Sidebar.Root class="shadow-none">
 	<Sidebar.Header>
 		<div class="flex items-center gap-2 px-2 py-4">
-			<div class="flex h-8 w-8 items-center justify-center rounded-lg">
-				<img src="/logo.svg" alt="Kwark Logo" class="h-8 w-8" />
+			<div class="flex h-8 w-8 items-center justify-center rounded-lg text-foreground">
+				<Logo class="h-8 w-8 text-gray-700 dark:text-white" />
 			</div>
 			<span class="text-lg font-bold">Kwark</span>
 		</div>
