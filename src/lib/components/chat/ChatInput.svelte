@@ -39,7 +39,7 @@
 </script>
 
 <div class="border-0 border-gray-200 pb-2 dark:border-gray-800">
-	<div class="mx-auto max-w-full">
+	<div class="mx-auto max-w-6xl">
 		<form onsubmit={onSubmit}>
 			<div class="flex w-full flex-col rounded-3xl border border-input">
 				<Textarea
@@ -71,6 +71,5 @@
 				</div>
 			</div>
 		</form>
-
 	</div>
 </div>

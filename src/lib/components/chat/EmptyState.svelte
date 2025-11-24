@@ -37,7 +37,7 @@
 	<div class="text-start">
 		<h2 class="mb-2 flex flex-col items-start gap-6 text-2xl text-gray-900 dark:text-gray-100">
 			<div class="flex h-12 w-12 items-center justify-center rounded-lg border border-gray-200">
-				<Hexagon class="h-6 w-6" />
+				<img src="/logo.svg" alt="Kwark Logo" class="h-8 w-8" />
 			</div>
 			<div class="flex flex-col gap-1">
 				{currentModelLabel}

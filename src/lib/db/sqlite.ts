@@ -8,7 +8,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
 	private sqlite: Database.Database;
 	private db: ReturnType<typeof drizzle>;
 
-	constructor(dbPath: string = './data/nanochat.db') {
+	constructor(dbPath: string = './data/kwark.db') {
 		this.sqlite = new Database(dbPath);
 		this.db = drizzle(this.sqlite, { schema });
 		this.initDatabase();

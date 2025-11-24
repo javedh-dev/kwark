@@ -28,7 +28,7 @@ export const GET: RequestHandler = async () => {
 
 		const data = await response.json();
 
-		console.log('Fetched models from API:', data.data);
+		// console.log('Fetched models from API:', data.data);
 
 		const models =
 			data.data?.map((model: any) => ({

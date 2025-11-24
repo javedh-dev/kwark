@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
@@ -114,9 +114,7 @@
 
 @layer base {
 	* {
-		font-family:
-			ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-			'Segoe UI Symbol', 'Noto Color Emoji';
+		font-family: 'Raleway', sans-serif;
 		@apply border-border outline-ring/50;
 	}
 	body {
@@ -127,16 +125,21 @@
 @layer components {
 	/* Enhanced markdown code blocks */
 	.prose pre {
-		@apply my-4 rounded-lg bg-gray-900 shadow-sm dark:bg-gray-950;
+		@apply my-4 rounded-lg bg-gray-100 text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-50;
 	}
 
 	.prose pre code {
-		@apply block overflow-x-auto p-4 font-mono text-sm leading-relaxed;
+		@apply block overflow-x-auto bg-transparent p-4 font-mono text-sm leading-relaxed text-inherit;
 	}
 
 	/* Inline code styling */
 	.prose :not(pre) > code {
-		@apply font-mono text-sm font-medium;
+		@apply rounded bg-gray-100 px-1.5 py-0.5 font-mono text-sm font-medium text-pink-600 dark:bg-gray-800 dark:text-pink-400;
+	}
+
+	.prose :not(pre) > code::before,
+	.prose :not(pre) > code::after {
+		content: '';
 	}
 
 	/* Better list spacing */
@@ -151,7 +154,7 @@
 
 	/* Paragraph spacing */
 	.prose p {
-		@apply my-3;
+		@apply my-3 leading-7 text-gray-800 dark:text-gray-200;
 	}
 
 	/* Heading spacing */
@@ -161,7 +164,7 @@
 	.prose h4,
 	.prose h5,
 	.prose h6 {
-		@apply mt-6 mb-3;
+		@apply mt-6 mb-3 font-semibold text-gray-900 dark:text-gray-100;
 	}
 
 	.prose h1 {
@@ -182,11 +185,22 @@
 	}
 
 	.prose th {
-		@apply border border-gray-200 bg-gray-100 px-4 py-2 text-left font-semibold dark:border-gray-700 dark:bg-gray-800;
+		@apply border border-gray-200 bg-gray-100 px-4 py-2 text-left font-semibold text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100;
+		padding-inline-start: 1rem !important;
 	}
 
 	.prose td {
-		@apply m-4 border border-gray-200 dark:border-gray-700;
+		@apply border border-gray-200 px-4 py-2 text-gray-700 dark:border-gray-700 dark:text-gray-300;
+	}
+
+	.prose th:first-child,
+	.prose td:first-child {
+		@apply pl-4;
+	}
+
+	.prose th:last-child,
+	.prose td:last-child {
+		@apply pr-4;
 	}
 
 	/* Horizontal rule */
@@ -196,7 +210,7 @@
 
 	/* Blockquote enhancement */
 	.prose blockquote {
-		@apply my-4 border-l-4 py-2 pl-4 italic;
+		@apply my-4 border-l-4 border-l-gray-300 py-2 pl-4 text-gray-700 italic dark:border-l-gray-600 dark:text-gray-300;
 	}
 
 	/* Syntax highlighting adjustments */
@@ -206,11 +220,26 @@
 
 	/* Link styling */
 	.prose a {
-		@apply transition-colors duration-200;
+		@apply text-blue-600 no-underline transition-colors duration-200 hover:underline dark:text-blue-400;
+	}
+
+	/* Strong styling */
+	.prose strong {
+		@apply font-semibold text-gray-900 dark:text-gray-100;
 	}
 
 	/* Image styling */
 	.prose img {
 		@apply my-4 rounded-lg shadow-sm;
+	}
+}
+
+@layer utilities {
+	.prose {
+		:where(tbody td:first-child, tfoot td:first-child):not(
+			:where([class~='not-prose'], [class~='not-prose'] *)
+		) {
+			@apply pl-4;
+		}
 	}
 }

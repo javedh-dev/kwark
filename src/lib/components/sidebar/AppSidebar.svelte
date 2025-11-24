@@ -63,10 +63,10 @@
 <Sidebar.Root class="shadow-none">
 	<Sidebar.Header>
 		<div class="flex items-center gap-2 px-2 py-4">
-			<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-				<Hexagon class="h-5 w-5" />
+			<div class="flex h-8 w-8 items-center justify-center rounded-lg">
+				<img src="/logo.svg" alt="Kwark Logo" class="h-8 w-8" />
 			</div>
-			<span class="text-lg font-bold">NanoChat</span>
+			<span class="text-lg font-bold">Kwark</span>
 		</div>
 		<div class="px-2">
 			<Button onclick={handleNewChat} class="w-full justify-start gap-2" variant="outline">

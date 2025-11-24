@@ -1,4 +1,4 @@
-# NanoChat
+# Kwark
 
 A lightweight chat application built with SvelteKit, featuring both localStorage and database persistence options.
 

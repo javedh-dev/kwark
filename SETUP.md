@@ -1,8 +1,9 @@
-# NanoChat Setup Guide
+# Kwark Setup Guide
 
 ## Environment Configuration
 
 1. Copy the example environment file:
+
    ```bash
    cp .env.example .env
    ```
@@ -18,24 +19,28 @@
 The backend works with any OpenAI-compatible API. Just change the `OPENAI_BASE_URL`:
 
 ### OpenAI
+
 ```env
 OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_API_KEY=sk-...
 ```
 
 ### Groq
+
 ```env
 OPENAI_BASE_URL=https://api.groq.com/openai/v1
 OPENAI_API_KEY=gsk_...
 ```
 
 ### Ollama (Local)
+
 ```env
 OPENAI_BASE_URL=http://localhost:11434/v1
 OPENAI_API_KEY=ollama
 ```
 
 ### Azure OpenAI
+
 ```env
 OPENAI_BASE_URL=https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT
 OPENAI_API_KEY=your-azure-key
