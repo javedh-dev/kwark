@@ -13,7 +13,7 @@
 </script>
 
 <Sidebar.Provider>
-	<AppSidebar />
+	<AppSidebar user={data.user} />
 	<main class="w-full">
 		{@render children?.()}
 	</main>

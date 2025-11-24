@@ -20,7 +20,7 @@
 
 <div class="flex h-screen bg-background">
 	<div class="flex flex-1 flex-col overflow-hidden px-8">
-		<AppHeader user={data.user} />
+		<AppHeader />
 		<ChatMessages messages={chat.messages} isLoading={chat.isLoading} />
 		<div class="shrink-0">
 			<ChatInput

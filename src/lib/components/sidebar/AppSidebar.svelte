@@ -14,6 +14,9 @@
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import * as Collapsible from '../ui/collapsible';
 	import Logo from '$lib/components/icons/Logo.svelte';
+	import UserProfile from './UserProfile.svelte';
+
+	let { user } = $props<{ user: { id: string; email: string; username?: string | null } }>();
 
 	function handleNewChat() {
 		chatStore.createNewChat();
@@ -63,11 +66,14 @@
 
 <Sidebar.Root class="shadow-none">
 	<Sidebar.Header>
-		<div class="flex items-center gap-2 px-2 py-4">
-			<div class="flex h-8 w-8 items-center justify-center rounded-lg text-foreground">
-				<Logo class="h-8 w-8 text-gray-700 dark:text-white" />
+		<div class="flex items-center justify-between px-2 py-4">
+			<div class="flex items-center gap-2">
+				<div class="flex h-8 w-8 items-center justify-center rounded-lg text-foreground">
+					<Logo class="h-8 w-8 text-gray-700 dark:text-white" />
+				</div>
+				<span class="text-lg font-bold">Kwark</span>
 			</div>
-			<span class="text-lg font-bold">Kwark</span>
+			<ThemeToggle />
 		</div>
 		<div class="px-2">
 			<Button onclick={handleNewChat} class="w-full justify-start gap-2" variant="outline">
@@ -159,9 +165,6 @@
 	</Sidebar.Content>
 
 	<Sidebar.Footer>
-		<div class="flex items-center justify-between p-4">
-			<div class="text-xs text-gray-500">v0.0.1</div>
-			<ThemeToggle />
-		</div>
+		<UserProfile {user} />
 	</Sidebar.Footer>
 </Sidebar.Root>
