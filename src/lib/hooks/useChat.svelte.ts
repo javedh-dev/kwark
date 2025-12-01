@@ -45,7 +45,10 @@ export function useChat() {
 					messages: messages
 						.filter((m) => m.id !== assistantMessageId)
 						.map((m) => ({ role: m.role, content: m.content })),
-					model: chatStore.selectedModel
+					model: chatStore.selectedModel,
+					temperature: chatStore.temperature,
+					customAttributes: chatStore.customAttributes,
+					systemPrompt: chatStore.systemPrompt
 				})
 			});
 

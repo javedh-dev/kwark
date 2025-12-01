@@ -25,6 +25,9 @@ export const chats = sqliteTable('chats', {
 		.notNull()
 		.references(() => users.id, { onDelete: 'cascade' }),
 	title: text('title').notNull(),
+	systemPrompt: text('system_prompt'),
+	temperature: text('temperature'),
+	llmParams: text('llm_params'), // JSON string of custom LLM parameters
 	createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 });

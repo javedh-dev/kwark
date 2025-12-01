@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import { ArrowUp, Paperclip, Wrench } from '@lucide/svelte';
+	import { ArrowUp, Paperclip } from '@lucide/svelte';
 
 	interface Props {
 		value: string;
@@ -55,9 +55,6 @@
 					<div class="flex flex-row gap-2">
 						<Button type="button" size="sm" variant="outline" class="rounded-4xl" disabled>
 							<Paperclip class="h-5 w-5" /> Attach
-						</Button>
-						<Button type="button" size="sm" variant="outline" class="rounded-4xl" disabled>
-							<Wrench class="h-5 w-5" /> Tools
 						</Button>
 					</div>
 					<Button

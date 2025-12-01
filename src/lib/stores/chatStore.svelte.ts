@@ -12,6 +12,9 @@ interface Chat {
 	createdAt: number;
 	updatedAt: number;
 	userId?: string | null;
+	systemPrompt?: string | null;
+	temperature?: string | null;
+	llmParams?: string | null; // JSON string of custom parameters
 }
 
 async function apiRequest(url: string, options?: RequestInit) {
@@ -46,6 +49,9 @@ function createChatStore() {
 	let currentChatId = $state<string | null>(null);
 	let isLoading = $state(false);
 	let selectedModel = $state('');
+	let temperature = $state(0.7);
+	let customAttributes = $state<Record<string, string>>({});
+	let systemPrompt = $state('');
 
 	return {
 		get chats() {
@@ -65,6 +71,24 @@ function createChatStore() {
 		},
 		set selectedModel(value: string) {
 			selectedModel = value;
+		},
+		get temperature() {
+			return temperature;
+		},
+		set temperature(value: number) {
+			temperature = value;
+		},
+		get customAttributes() {
+			return customAttributes;
+		},
+		set customAttributes(value: Record<string, string>) {
+			customAttributes = value;
+		},
+		get systemPrompt() {
+			return systemPrompt;
+		},
+		set systemPrompt(value: string) {
+			systemPrompt = value;
 		},
 
 		async loadChats() {
@@ -120,6 +144,11 @@ function createChatStore() {
 			const chat = chats.find((c) => c.id === chatId);
 			if (chat) {
 				currentChatId = chatId;
+
+				// Load chat-specific LLM settings
+				systemPrompt = chat.systemPrompt || '';
+				temperature = chat.temperature ? parseFloat(chat.temperature) : 0.7;
+				customAttributes = chat.llmParams ? JSON.parse(chat.llmParams) : {};
 			}
 		},
 
@@ -212,6 +241,57 @@ function createChatStore() {
 			} catch (error) {
 				console.error('Error renaming chat:', error);
 				throw error;
+			}
+		},
+
+		async saveChatSettings() {
+			if (!currentChatId) return;
+
+			try {
+				// Only send non-default values
+				const settings: Record<string, string> = {};
+
+				if (systemPrompt) {
+					settings.systemPrompt = systemPrompt;
+				}
+
+				if (temperature !== 0.7) {
+					settings.temperature = temperature.toString();
+				}
+
+				// Filter out empty custom attributes
+				const nonEmptyAttrs: Record<string, string> = {};
+				Object.entries(customAttributes).forEach(([key, value]) => {
+					if (value && value.trim()) {
+						nonEmptyAttrs[key] = value.trim();
+					}
+				});
+
+				if (Object.keys(nonEmptyAttrs).length > 0) {
+					settings.llmParams = JSON.stringify(nonEmptyAttrs);
+				}
+
+				// Only send request if there are settings to save
+				if (Object.keys(settings).length > 0) {
+					await apiRequest(`/api/chats/${currentChatId}`, {
+						method: 'PATCH',
+						body: JSON.stringify(settings)
+					});
+
+					// Update local chat object
+					chats = chats.map((chat) => {
+						if (chat.id === currentChatId) {
+							return {
+								...chat,
+								...settings,
+								updatedAt: Date.now()
+							};
+						}
+						return chat;
+					});
+				}
+			} catch (error) {
+				console.error('Error saving chat settings:', error);
 			}
 		},
 

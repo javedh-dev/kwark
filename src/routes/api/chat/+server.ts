@@ -8,7 +8,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
-		const { messages, model } = await request.json();
+		const { messages, model, temperature, customAttributes, systemPrompt } = await request.json();
 
 		if (!messages || !Array.isArray(messages)) {
 			throw error(400, 'Invalid messages format');
@@ -18,17 +18,72 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const baseUrl = LLM_BASE_URL || 'https://api.openai.com/v1';
 		const llmModel = model || LLM_MODEL || '';
 
+		// Prepend system prompt if provided
+		const finalMessages = systemPrompt
+			? [{ role: 'system', content: systemPrompt }, ...messages]
+			: messages;
+
+		// Convert numeric string parameters to numbers
+		const numericParams = [
+			'temperature',
+			'max_tokens',
+			'top_p',
+			'top_k',
+			'min_p',
+			'frequency_penalty',
+			'presence_penalty',
+			'repeat_penalty',
+			'seed',
+			'stream_delta_chunk_size',
+			'mirostat_tau',
+			'repeat_last_n',
+			'tfs_z'
+		];
+
+		const booleanParams = ['use_mmap', 'use_mlock', 'stream_chat_response'];
+
+		const processedAttributes: Record<string, any> = {};
+		if (customAttributes) {
+			Object.entries(customAttributes).forEach(([key, value]) => {
+				if (numericParams.includes(key)) {
+					const num = parseFloat(value as string);
+					if (!isNaN(num)) {
+						processedAttributes[key] = num;
+					}
+				} else if (booleanParams.includes(key)) {
+					// Convert string boolean values to actual booleans
+					if (value === 'true' || value === '1') {
+						processedAttributes[key] = true;
+					} else if (value === 'false' || value === '0') {
+						processedAttributes[key] = false;
+					} else {
+						processedAttributes[key] = value;
+					}
+				} else {
+					processedAttributes[key] = value;
+				}
+			});
+		}
+
+		// Merge custom attributes into the body
+		const body = {
+			model: llmModel,
+			messages: finalMessages,
+			stream: true,
+			temperature: temperature ?? 0.7,
+			...processedAttributes
+		};
+
+		// Log the request body for debugging (remove in production)
+		console.log('LLM Request Body:', JSON.stringify(body, null, 2));
+
 		const response = await fetch(`${baseUrl}/chat/completions`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${apiKey}`
 			},
-			body: JSON.stringify({
-				model: llmModel,
-				messages,
-				stream: true
-			})
+			body: JSON.stringify(body)
 		});
 
 		if (!response.ok) {

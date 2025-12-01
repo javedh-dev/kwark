@@ -36,12 +36,20 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 		throw error(403, 'Forbidden');
 	}
 
-	const { title } = await request.json();
+	const body = await request.json();
+	const { title, systemPrompt, temperature, llmParams } = body;
 
-	await db.updateChat(params.chatId, {
-		title,
+	// Build update object with only provided fields
+	const updateData: Record<string, unknown> = {
 		updatedAt: new Date()
-	});
+	};
+
+	if (title !== undefined) updateData.title = title;
+	if (systemPrompt !== undefined) updateData.systemPrompt = systemPrompt;
+	if (temperature !== undefined) updateData.temperature = temperature;
+	if (llmParams !== undefined) updateData.llmParams = llmParams;
+
+	await db.updateChat(params.chatId, updateData);
 
 	const chat = await db.getChat(params.chatId);
 	return json(chat);
