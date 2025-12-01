@@ -51,6 +51,17 @@ export class SQLiteAdapter implements DatabaseAdapter {
 				created_at INTEGER NOT NULL
 			);
 
+			CREATE TABLE IF NOT EXISTS ai_connections (
+				id TEXT PRIMARY KEY,
+				name TEXT NOT NULL,
+				base_url TEXT NOT NULL,
+				api_key TEXT NOT NULL,
+				default_model TEXT,
+				is_default INTEGER NOT NULL DEFAULT 0,
+				created_at INTEGER NOT NULL,
+				updated_at INTEGER NOT NULL
+			);
+
 			CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
 			CREATE INDEX IF NOT EXISTS idx_chats_user_id ON chats(user_id);
 			CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id);
@@ -215,6 +226,79 @@ export class SQLiteAdapter implements DatabaseAdapter {
 	async getUserByEmail(email: string): Promise<UserData | null> {
 		const users = await this.db.select().from(schema.users).where(eq(schema.users.email, email));
 		return users.length > 0 ? users[0] : null;
+	}
+
+	// AI Connection operations
+	async createAiConnection(connection: {
+		id: string;
+		name: string;
+		baseUrl: string;
+		apiKey: string;
+		defaultModel?: string;
+		isDefault?: boolean;
+	}): Promise<void> {
+		const now = new Date();
+		
+		// If this is set as default, unset all other defaults
+		if (connection.isDefault) {
+			await this.db.update(schema.aiConnections).set({ isDefault: false });
+		}
+
+		await this.db.insert(schema.aiConnections).values({
+			id: connection.id,
+			name: connection.name,
+			baseUrl: connection.baseUrl,
+			apiKey: connection.apiKey,
+			defaultModel: connection.defaultModel || null,
+			isDefault: connection.isDefault || false,
+			createdAt: now,
+			updatedAt: now
+		});
+	}
+
+	async getAiConnections(): Promise<(typeof schema.aiConnections.$inferSelect)[]> {
+		return await this.db.select().from(schema.aiConnections).orderBy(desc(schema.aiConnections.createdAt));
+	}
+
+	async getAiConnection(id: string): Promise<(typeof schema.aiConnections.$inferSelect) | null> {
+		const connections = await this.db
+			.select()
+			.from(schema.aiConnections)
+			.where(eq(schema.aiConnections.id, id));
+		return connections.length > 0 ? connections[0] : null;
+	}
+
+	async getDefaultAiConnection(): Promise<(typeof schema.aiConnections.$inferSelect) | null> {
+		const connections = await this.db
+			.select()
+			.from(schema.aiConnections)
+			.where(eq(schema.aiConnections.isDefault, true));
+		return connections.length > 0 ? connections[0] : null;
+	}
+
+	async updateAiConnection(
+		id: string,
+		data: {
+			name?: string;
+			baseUrl?: string;
+			apiKey?: string;
+			defaultModel?: string;
+			isDefault?: boolean;
+		}
+	): Promise<void> {
+		// If setting as default, unset all other defaults
+		if (data.isDefault) {
+			await this.db.update(schema.aiConnections).set({ isDefault: false });
+		}
+
+		await this.db
+			.update(schema.aiConnections)
+			.set({ ...data, updatedAt: new Date() })
+			.where(eq(schema.aiConnections.id, id));
+	}
+
+	async deleteAiConnection(id: string): Promise<void> {
+		await this.db.delete(schema.aiConnections).where(eq(schema.aiConnections.id, id));
 	}
 
 	async close(): Promise<void> {

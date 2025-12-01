@@ -48,7 +48,8 @@ export function useChat() {
 					model: chatStore.selectedModel,
 					temperature: chatStore.temperature,
 					customAttributes: chatStore.customAttributes,
-					systemPrompt: chatStore.systemPrompt
+					systemPrompt: chatStore.systemPrompt,
+					connectionId: chatStore.connectionId
 				})
 			});
 

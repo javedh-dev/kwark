@@ -64,6 +64,7 @@
 		"better-sqlite3": "^12.4.6",
 		"drizzle-orm": "^0.44.7",
 		"highlight.js": "^11.11.1",
-		"marked": "^17.0.1"
+		"marked": "^17.0.1",
+		"nanoid": "^5.1.6"
 	}
 }

@@ -30,8 +30,6 @@ A lightweight chat application built with SvelteKit, featuring both localStorage
 
 ## Quick Start
 
-## Installation
-
 ```bash
 # Install dependencies
 pnpm install
@@ -39,6 +37,21 @@ pnpm install
 # Start development server
 pnpm dev
 ```
+
+### First Time Setup
+
+1. Open the app in your browser (usually http://localhost:5173)
+2. Register a new account
+3. Navigate to **Settings** → **AI Connections**
+4. Add your first AI connection:
+   - **Name**: e.g., "OpenAI" or "Local LLM"
+   - **Base URL**: Your API endpoint (e.g., `https://api.openai.com/v1`)
+   - **API Key**: Your API key
+   - **Default Model**: (optional) e.g., `gpt-4`
+   - Check "Set as default connection"
+5. Start chatting!
+
+See [AI_CONNECTIONS.md](AI_CONNECTIONS.md) for detailed configuration options.
 
 ## Database Setup (Optional)
 

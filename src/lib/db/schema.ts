@@ -44,6 +44,17 @@ export const messages = sqliteTable('messages', {
 	createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
 });
 
+export const aiConnections = sqliteTable('ai_connections', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	baseUrl: text('base_url').notNull(),
+	apiKey: text('api_key').notNull(),
+	defaultModel: text('default_model'),
+	isDefault: integer('is_default', { mode: 'boolean' }).notNull().default(false),
+	createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
@@ -52,3 +63,5 @@ export type Chat = typeof chats.$inferSelect;
 export type InsertChat = typeof chats.$inferInsert;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = typeof messages.$inferInsert;
+export type AiConnection = typeof aiConnections.$inferSelect;
+export type InsertAiConnection = typeof aiConnections.$inferInsert;

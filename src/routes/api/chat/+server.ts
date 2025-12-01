@@ -1,6 +1,8 @@
-import { LLM_API_KEY, LLM_BASE_URL, LLM_MODEL } from '$env/static/private';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { getDatabase } from '$lib/db';
+
+const db = getDatabase();
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.user) {
@@ -14,9 +16,47 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			throw error(400, 'Invalid messages format');
 		}
 
-		const apiKey = LLM_API_KEY || '';
-		const baseUrl = LLM_BASE_URL || 'https://api.openai.com/v1';
-		const llmModel = model || LLM_MODEL || '';
+		let apiKey = '';
+		let baseUrl = '';
+		let llmModel = '';
+		let connectionId = '';
+
+		// Parse model format: "connectionId:modelName" or just "modelName"
+		if (model && model.includes(':')) {
+			const [connId, modelName] = model.split(':', 2);
+			connectionId = connId;
+			llmModel = modelName;
+		} else {
+			llmModel = model || '';
+		}
+
+		// If connectionId is extracted from model, use that connection
+		// Otherwise, try to get the default connection from database
+		if (connectionId) {
+			const connection = await db.getAiConnection(connectionId);
+			if (!connection) {
+				throw error(404, 'AI connection not found');
+			}
+			apiKey = connection.apiKey;
+			baseUrl = connection.baseUrl;
+			llmModel = llmModel || connection.defaultModel || '';
+		} else {
+			const defaultConnection = await db.getDefaultAiConnection();
+			if (!defaultConnection) {
+				throw error(400, 'No default AI connection configured. Please add one in Settings.');
+			}
+			apiKey = defaultConnection.apiKey;
+			baseUrl = defaultConnection.baseUrl;
+			llmModel = llmModel || defaultConnection.defaultModel || '';
+		}
+
+		if (!apiKey || !baseUrl) {
+			throw error(400, 'Invalid AI connection configuration');
+		}
+
+		if (!llmModel) {
+			throw error(400, 'No model specified. Please select a model.');
+		}
 
 		// Prepend system prompt if provided
 		const finalMessages = systemPrompt

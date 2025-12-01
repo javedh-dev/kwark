@@ -53,6 +53,7 @@ function createChatStore() {
 	let temperature = $state(0.7);
 	let customAttributes = $state<Record<string, string>>({});
 	let systemPrompt = $state('');
+	let connectionIds = $state<string[]>([]);
 
 	return {
 		get chats() {
@@ -91,10 +92,34 @@ function createChatStore() {
 		set systemPrompt(value: string) {
 			systemPrompt = value;
 		},
+		get connectionIds() {
+			return connectionIds;
+		},
+		set connectionIds(value: string[]) {
+			connectionIds = value;
+		},
+
+		async loadDefaultConnection() {
+			try {
+				const response = await fetch('/api/ai-connections');
+				if (response.ok) {
+					const connections = await response.json();
+					const defaultConn = connections.find((c: any) => c.isDefault);
+					if (defaultConn && connectionIds.length === 0) {
+						connectionIds = [defaultConn.id];
+					}
+				}
+			} catch (error) {
+				console.error('Error loading default connection:', error);
+			}
+		},
 
 		async loadChats() {
 			isLoading = true;
 			try {
+				// Load default connection first
+				await this.loadDefaultConnection();
+				
 				const url = '/api/chats';
 				const data = await apiRequest(url);
 				chats = data.map((chat: Chat & { createdAt: string; updatedAt: string }) => ({

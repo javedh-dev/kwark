@@ -1,4 +1,4 @@
-import type { User, Chat, Message, Session } from './schema';
+import type { User, Chat, Message, Session, AiConnection } from './schema';
 
 export interface DatabaseAdapter {
 	// Chats
@@ -39,6 +39,27 @@ export interface DatabaseAdapter {
 	deleteSession(sessionId: string): Promise<void>;
 	deleteExpiredSessions(): Promise<void>;
 	getUserSessions(userId: string): Promise<Session[]>;
+
+	// AI Connections
+	createAiConnection(connection: {
+		id: string;
+		name: string;
+		baseUrl: string;
+		apiKey: string;
+		defaultModel?: string;
+		isDefault?: boolean;
+	}): Promise<void>;
+	getAiConnections(): Promise<AiConnection[]>;
+	getAiConnection(id: string): Promise<AiConnection | null>;
+	getDefaultAiConnection(): Promise<AiConnection | null>;
+	updateAiConnection(id: string, data: {
+		name?: string;
+		baseUrl?: string;
+		apiKey?: string;
+		defaultModel?: string;
+		isDefault?: boolean;
+	}): Promise<void>;
+	deleteAiConnection(id: string): Promise<void>;
 
 	close(): Promise<void>;
 }

@@ -63,6 +63,8 @@
 	let customParams = $state<Record<string, string>>({});
 	let newParamKey = $state('');
 	let newParamValue = $state('');
+	let aiConnections = $state<any[]>([]);
+	let selectedConnectionIds = $state<string[]>([]);
 
 	let allParams = $state<AllParams>({
 		temperature: '0.7',
@@ -113,12 +115,40 @@
 		'use_mlock'
 	]);
 
+	// Load AI connections
+	async function loadAiConnections() {
+		try {
+			const response = await fetch('/api/ai-connections');
+			if (response.ok) {
+				const connections = await response.json();
+				aiConnections = connections;
+				// Set default connection if available and none selected
+				const defaultConn = connections.find((c: any) => c.isDefault);
+				if (defaultConn && selectedConnectionIds.length === 0) {
+					selectedConnectionIds = [defaultConn.id];
+				}
+			}
+		} catch (error) {
+			console.error('Failed to load AI connections:', error);
+		}
+	}
+
+	function toggleConnection(connectionId: string) {
+		if (selectedConnectionIds.includes(connectionId)) {
+			selectedConnectionIds = selectedConnectionIds.filter(id => id !== connectionId);
+		} else {
+			selectedConnectionIds = [...selectedConnectionIds, connectionId];
+		}
+	}
+
 	// Load current settings when opening
 	$effect(() => {
 		if (open) {
+			loadAiConnections();
 			const allAttrs = { ...chatStore.customAttributes };
 
 			systemPrompt = chatStore.systemPrompt;
+			selectedConnectionIds = chatStore.connectionIds.length > 0 ? [...chatStore.connectionIds] : [];
 
 			// Separate known params from custom ones
 			const custom: Record<string, string> = {};
@@ -177,6 +207,7 @@
 		chatStore.temperature = parseFloat(allParams.temperature) || 0.7;
 		chatStore.customAttributes = finalAttrs;
 		chatStore.systemPrompt = systemPrompt;
+		chatStore.connectionIds = selectedConnectionIds;
 
 		// Save settings to current chat
 		chatStore.saveChatSettings();
@@ -246,6 +277,34 @@
 		</SheetHeader>
 
 		<div class="space-y-4 px-4 pb-4">
+			<!-- AI Connection Selector -->
+			{#if aiConnections.length > 0}
+				<div class="space-y-2">
+					<Label class="text-sm font-semibold">AI Connections</Label>
+					<div class="space-y-2 rounded-md border border-input p-3">
+						{#each aiConnections as connection}
+							<label class="flex items-center gap-2 cursor-pointer">
+								<input
+									type="checkbox"
+									checked={selectedConnectionIds.includes(connection.id)}
+									onchange={() => toggleConnection(connection.id)}
+									class="h-4 w-4 rounded border-input text-primary focus:ring-primary"
+								/>
+								<span class="text-sm">
+									{connection.name}
+									{#if connection.isDefault}
+										<span class="text-xs text-muted-foreground">(Default)</span>
+									{/if}
+								</span>
+							</label>
+						{/each}
+					</div>
+					<p class="text-xs text-muted-foreground">
+						Select one or more connections. Models from all selected connections will be available.
+					</p>
+				</div>
+			{/if}
+
 			<!-- System Prompt -->
 			<div class="space-y-2">
 				<Label for="system-prompt" class="text-sm font-semibold">System Prompt</Label>

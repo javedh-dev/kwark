@@ -59,7 +59,7 @@
 						<User class="mr-2 h-4 w-4" />
 						Profile
 					</DropdownMenu.Item>
-					<DropdownMenu.Item>
+					<DropdownMenu.Item onclick={() => goto('/settings')}>
 						<Settings class="mr-2 h-4 w-4" />
 						Settings
 					</DropdownMenu.Item>

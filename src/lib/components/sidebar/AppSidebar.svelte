@@ -68,10 +68,12 @@
 	<Sidebar.Header>
 		<div class="flex items-center justify-between px-2 py-4">
 			<div class="flex items-center gap-2">
-				<div class="flex h-8 w-8 items-center justify-center rounded-lg text-foreground">
-					<Logo class="h-8 w-8 text-gray-700 dark:text-white" />
-				</div>
-				<span class="text-lg font-bold">Kwark</span>
+				<a href="/" class="flex items-center gap-2">
+					<div class="flex h-8 w-8 items-center justify-center rounded-lg text-foreground">
+						<Logo class="h-8 w-8 text-gray-700 dark:text-white" />
+					</div>
+					<span class="text-lg font-bold">Kwark</span>
+				</a>
 			</div>
 			<ThemeToggle />
 		</div>
