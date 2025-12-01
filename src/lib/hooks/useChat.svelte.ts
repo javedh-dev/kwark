@@ -64,6 +64,7 @@ export function useChat() {
 			}
 
 			let accumulatedContent = '';
+			let accumulatedThinking = '';
 
 			while (true) {
 				const { done, value } = await reader.read();
@@ -75,14 +76,42 @@ export function useChat() {
 				for (const line of lines) {
 					if (line.startsWith('data: ')) {
 						try {
-							const content = JSON.parse(line.slice(6));
-							accumulatedContent += content;
-
-							messages = messages.map((m) =>
-								m.id === assistantMessageId
-									? { ...m, content: accumulatedContent, model: chatStore.selectedModel }
-									: m
-							);
+							const parsed = JSON.parse(line.slice(6));
+							
+							// Handle different types of content
+							if (parsed.type === 'content') {
+								accumulatedContent += parsed.data;
+								messages = messages.map((m) =>
+									m.id === assistantMessageId
+										? { 
+												...m, 
+												content: accumulatedContent, 
+												model: chatStore.selectedModel,
+												thinking: accumulatedThinking || undefined
+											}
+										: m
+								);
+							} else if (parsed.type === 'thinking') {
+								accumulatedThinking += parsed.data;
+								messages = messages.map((m) =>
+									m.id === assistantMessageId
+										? { 
+												...m, 
+												content: accumulatedContent,
+												model: chatStore.selectedModel,
+												thinking: accumulatedThinking
+											}
+										: m
+								);
+							} else {
+								// Fallback for old format (plain string content)
+								accumulatedContent += parsed;
+								messages = messages.map((m) =>
+									m.id === assistantMessageId
+										? { ...m, content: accumulatedContent, model: chatStore.selectedModel }
+										: m
+								);
+							}
 						} catch (e) {
 							console.error('Error parsing streamed content:', e, 'Line:', line);
 						}

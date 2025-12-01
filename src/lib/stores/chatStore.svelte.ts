@@ -3,6 +3,7 @@ interface Message {
 	role: 'user' | 'assistant';
 	content: string;
 	model?: string;
+	thinking?: string; // Reasoning/thinking content for models that support it
 }
 
 interface Chat {
@@ -183,7 +184,8 @@ function createChatStore() {
 						body: JSON.stringify({
 							role: message.role,
 							content: message.content,
-							...(message.model && { model: message.model })
+							...(message.model && { model: message.model }),
+							...(message.thinking && { thinking: message.thinking })
 						})
 					});
 				}

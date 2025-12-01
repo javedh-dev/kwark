@@ -8,6 +8,7 @@ A lightweight chat application built with SvelteKit, featuring both localStorage
 - 💾 **Dual storage options**: localStorage (browser) or SQLite database (server)
 - 🔐 **Auth-ready**: Database schema prepared for user authentication
 - 🔄 **Flexible**: Easy to switch between SQLite, PostgreSQL, MySQL
+- 🧠 **Thinking/Reasoning support**: Displays model reasoning for compatible models (o1, deepseek-reasoner, etc.)
 - 📱 Responsive design
 - ⚡ Fast and lightweight
 

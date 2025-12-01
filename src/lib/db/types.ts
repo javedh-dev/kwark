@@ -14,6 +14,7 @@ export interface DatabaseAdapter {
 		role: 'user' | 'assistant';
 		content: string;
 		model?: string;
+		thinking?: string;
 	}): Promise<void>;
 	getMessages(chatId: string): Promise<MessageData[]>;
 

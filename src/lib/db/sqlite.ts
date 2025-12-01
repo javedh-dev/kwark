@@ -115,12 +115,14 @@ export class SQLiteAdapter implements DatabaseAdapter {
 		role: 'user' | 'assistant';
 		content: string;
 		model?: string;
+		thinking?: string;
 	}): Promise<void> {
 		await this.db.insert(schema.messages).values({
 			chatId: message.chatId,
 			role: message.role,
 			content: message.content,
 			model: message.model,
+			thinking: message.thinking,
 			createdAt: new Date()
 		});
 

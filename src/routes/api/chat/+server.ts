@@ -118,11 +118,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 								try {
 									const parsed = JSON.parse(data);
-									const content = parsed.choices?.[0]?.delta?.content;
+									const delta = parsed.choices?.[0]?.delta;
+									
+									// Handle regular content
+									const content = delta?.content;
 									if (content) {
-										// Use JSON.stringify to preserve newlines and special characters
 										controller.enqueue(
-											new TextEncoder().encode(`data: ${JSON.stringify(content)}\n\n`)
+											new TextEncoder().encode(`data: ${JSON.stringify({ type: 'content', data: content })}\n\n`)
+										);
+									}
+									
+									// Handle reasoning/thinking content (for models like o1, deepseek-reasoner, etc.)
+									const reasoning = delta?.reasoning_content;
+									if (reasoning) {
+										controller.enqueue(
+											new TextEncoder().encode(`data: ${JSON.stringify({ type: 'thinking', data: reasoning })}\n\n`)
 										);
 									}
 								} catch (e) {

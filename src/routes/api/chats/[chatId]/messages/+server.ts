@@ -32,13 +32,14 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		throw error(403, 'Forbidden');
 	}
 
-	const { role, content, model } = await request.json();
+	const { role, content, model, thinking } = await request.json();
 
 	await db.addMessage({
 		chatId: params.chatId,
 		role,
 		content,
-		...(model && { model })
+		...(model && { model }),
+		...(thinking && { thinking })
 	});
 
 	const messages = await db.getMessages(params.chatId);

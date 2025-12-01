@@ -33,8 +33,8 @@
 				<EmptyState />
 			{:else}
 				<div class="space-y-4 px-8 py-6">
-					{#each messages as message (message.id)}
-						<ChatMessage {message} />
+					{#each messages as message, index (message.id)}
+						<ChatMessage {message} isStreaming={isLoading && index === messages.length - 1} />
 					{/each}
 					{#if isLoading}
 						<LoadingIndicator />

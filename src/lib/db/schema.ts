@@ -40,6 +40,7 @@ export const messages = sqliteTable('messages', {
 	role: text('role', { enum: ['user', 'assistant'] }).notNull(),
 	content: text('content').notNull(),
 	model: text('model'),
+	thinking: text('thinking'), // Reasoning/thinking content for models that support it
 	createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
 });
 
