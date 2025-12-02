@@ -284,16 +284,27 @@ function createChatStore() {
 				// 5. Stream response
 				// Get fresh current chat to include the user message we just added
 				const freshChat = chats.find((c) => c.id === chatId);
+
+				// Parse model and connectionId from selectedModel (format: "connectionId:modelName")
+				let modelName = selectedModel;
+				let connectionId = connectionIds.length > 0 ? connectionIds[0] : undefined;
+
+				if (selectedModel && selectedModel.includes(':')) {
+					const [connId, ...modelParts] = selectedModel.split(':');
+					connectionId = connId;
+					modelName = modelParts.join(':'); // In case model name has colons
+				}
+
 				const requestBody = {
 					messages:
 						freshChat?.messages
 							.filter((m) => m.id !== assistantMessageId)
 							.map((m) => ({ role: m.role, content: m.content })) || [],
-					model: selectedModel,
+					model: modelName,
 					temperature: temperature,
 					customAttributes: customAttributes,
 					systemPrompt: systemPrompt,
-					connectionIds: connectionIds
+					connectionId: connectionId
 				};
 
 				const response = await fetch('/api/chat', {
@@ -327,14 +338,14 @@ function createChatStore() {
 									accumulatedContent += parsed.data;
 									this.updateMessageInChat(chatId, assistantMessageId, {
 										content: accumulatedContent,
-										model: selectedModel,
+										model: modelName,
 										thinking: accumulatedThinking || undefined
 									});
 								} else if (parsed.type === 'thinking') {
 									accumulatedThinking += parsed.data;
 									this.updateMessageInChat(chatId, assistantMessageId, {
 										content: accumulatedContent,
-										model: selectedModel,
+										model: modelName,
 										thinking: accumulatedThinking
 									});
 								}
@@ -349,7 +360,7 @@ function createChatStore() {
 				await this.saveMessage(chatId, {
 					...assistantMessage,
 					content: accumulatedContent,
-					model: selectedModel,
+					model: modelName,
 					thinking: accumulatedThinking || undefined
 				});
 			} catch (error) {
