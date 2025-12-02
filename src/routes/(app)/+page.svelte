@@ -25,7 +25,6 @@
 				bind:value={chat.input}
 				isLoading={chat.isLoading}
 				onSubmit={chat.sendMessage}
-				onInput={(value: any) => (chat.input = value)}
 			/>
 		</div>
 	</div>

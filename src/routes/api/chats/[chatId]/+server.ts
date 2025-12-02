@@ -40,7 +40,13 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 	const { title, systemPrompt, temperature, llmParams } = body;
 
 	// Build update object with only provided fields
-	const updateData: Record<string, unknown> = {
+	const updateData: {
+		title?: string;
+		systemPrompt?: string;
+		temperature?: string;
+		llmParams?: string;
+		updatedAt: Date;
+	} = {
 		updatedAt: new Date()
 	};
 

@@ -5,7 +5,16 @@ export interface DatabaseAdapter {
 	createChat(chat: { id: string; userId: string; title: string }): Promise<void>;
 	getChats(userId?: string): Promise<ChatWithMessages[]>;
 	getChat(chatId: string): Promise<ChatWithMessages | null>;
-	updateChat(chatId: string, data: { title?: string; updatedAt: Date }): Promise<void>;
+	updateChat(
+		chatId: string,
+		data: {
+			title?: string;
+			systemPrompt?: string;
+			temperature?: string;
+			llmParams?: string;
+			updatedAt: Date;
+		}
+	): Promise<void>;
 	deleteChat(chatId: string): Promise<void>;
 
 	// Messages

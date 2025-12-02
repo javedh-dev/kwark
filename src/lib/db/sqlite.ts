@@ -113,7 +113,16 @@ export class SQLiteAdapter implements DatabaseAdapter {
 		};
 	}
 
-	async updateChat(chatId: string, data: { title?: string; updatedAt: Date }): Promise<void> {
+	async updateChat(
+		chatId: string,
+		data: {
+			title?: string;
+			systemPrompt?: string;
+			temperature?: string;
+			llmParams?: string;
+			updatedAt: Date;
+		}
+	): Promise<void> {
 		await this.db.update(schema.chats).set(data).where(eq(schema.chats.id, chatId));
 	}
 
