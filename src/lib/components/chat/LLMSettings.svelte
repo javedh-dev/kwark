@@ -135,7 +135,7 @@
 
 	function toggleConnection(connectionId: string) {
 		if (selectedConnectionIds.includes(connectionId)) {
-			selectedConnectionIds = selectedConnectionIds.filter(id => id !== connectionId);
+			selectedConnectionIds = selectedConnectionIds.filter((id) => id !== connectionId);
 		} else {
 			selectedConnectionIds = [...selectedConnectionIds, connectionId];
 		}
@@ -148,7 +148,8 @@
 			const allAttrs = { ...chatStore.customAttributes };
 
 			systemPrompt = chatStore.systemPrompt;
-			selectedConnectionIds = chatStore.connectionIds.length > 0 ? [...chatStore.connectionIds] : [];
+			// Always load from store, even if empty
+			selectedConnectionIds = [...chatStore.connectionIds];
 
 			// Separate known params from custom ones
 			const custom: Record<string, string> = {};
@@ -283,7 +284,7 @@
 					<Label class="text-sm font-semibold">AI Connections</Label>
 					<div class="space-y-2 rounded-md border border-input p-3">
 						{#each aiConnections as connection}
-							<label class="flex items-center gap-2 cursor-pointer">
+							<label class="flex cursor-pointer items-center gap-2">
 								<input
 									type="checkbox"
 									checked={selectedConnectionIds.includes(connection.id)}

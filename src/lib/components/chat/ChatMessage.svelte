@@ -83,7 +83,7 @@
 						<span class="font-medium">Reasoning</span>
 					</summary>
 					<div
-						class="prose-sm prose mt-2 max-w-none border-l-2 border-muted pl-4 text-sm text-muted-foreground dark:prose-invert"
+						class="prose prose-sm mt-2 max-w-none border-l-2 border-muted pl-4 text-sm text-muted-foreground dark:prose-invert"
 					>
 						{@html marked(message.thinking)}
 					</div>

@@ -1,10 +1,10 @@
 #!/usr/bin/env tsx
 /**
  * Migration script to convert .env LLM configuration to AI Connection
- * 
+ *
  * This script reads LLM_BASE_URL, LLM_API_KEY, and LLM_MODEL from .env
  * and creates an AI connection in the database.
- * 
+ *
  * Usage: npx tsx scripts/migrate-env-to-connection.ts
  */
 
@@ -32,7 +32,7 @@ async function migrate() {
 
 		// Check if a connection with this base URL already exists
 		const existingConnections = await db.getAiConnections();
-		const existing = existingConnections.find(c => c.baseUrl === baseUrl);
+		const existing = existingConnections.find((c) => c.baseUrl === baseUrl);
 
 		if (existing) {
 			console.log('✅ AI connection already exists:');
@@ -74,9 +74,10 @@ async function migrate() {
 		console.log(`   Default Model: ${model || 'Not set'}`);
 		console.log(`   Set as Default: Yes`);
 		console.log('');
-		console.log('💡 You can now remove LLM_BASE_URL, LLM_API_KEY, and LLM_MODEL from your .env file');
+		console.log(
+			'💡 You can now remove LLM_BASE_URL, LLM_API_KEY, and LLM_MODEL from your .env file'
+		);
 		console.log('   Manage connections through Settings > AI Connections');
-
 	} catch (error) {
 		console.error('❌ Migration failed:', error);
 		process.exit(1);

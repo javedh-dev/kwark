@@ -16,61 +16,59 @@
 	async function loadModels() {
 		loading = true;
 		try {
-			const connectionIds = chatStore.connectionIds;
-			
+			let connectionIds = chatStore.connectionIds;
+
+			// If no connections selected, get the default connection
 			if (connectionIds.length === 0) {
-				// No connections selected, try default
-				console.log('Loading models from default connection');
-				const response = await fetch('/api/models');
-				
-				if (!response.ok) {
-					const errorText = await response.text();
-					console.error('Failed to fetch models:', response.status, errorText);
-					models = [];
-					return;
+				const defaultConnection = aiConnections.find((c: any) => c.isDefault);
+				if (defaultConnection) {
+					connectionIds = [defaultConnection.id];
+					// Update store with default connection
+					chatStore.connectionIds = connectionIds;
 				}
-				
-				const data = await response.json();
-				console.log('Loaded models from default:', data.length);
-				models = data;
-			} else {
-				// Fetch models from all selected connections
-				console.log('Loading models from connections:', connectionIds);
-				const allModels: any[] = [];
-				
-				for (const connectionId of connectionIds) {
-					try {
-						const response = await fetch(`/api/models?connectionId=${connectionId}`);
-						
-						if (response.ok) {
-							const data = await response.json();
-							// Add connection name prefix to avoid duplicates
-							const connection = aiConnections.find((c: any) => c.id === connectionId);
-							const connectionName = connection?.name || connectionId;
-							
-							const prefixedModels = data.map((model: any) => ({
-								value: `${connectionId}:${model.value}`,
-								label: `[${connectionName}] ${model.label}`,
-								connectionId,
-								originalValue: model.value
-							}));
-							
-							allModels.push(...prefixedModels);
-						}
-					} catch (err) {
-						console.error(`Failed to fetch models from connection ${connectionId}:`, err);
-					}
-				}
-				
-				console.log('Loaded total models:', allModels.length);
-				models = allModels;
 			}
-			
-			if (models.length > 0 && !value) {
-				value = models[0].value;
+
+			if (connectionIds.length === 0) {
+				models = [];
+				loading = false;
+				return;
+			}
+
+			const allModels: any[] = [];
+
+			for (const connectionId of connectionIds) {
+				try {
+					const response = await fetch(`/api/models?connectionId=${connectionId}`);
+
+					if (response.ok) {
+						const data = await response.json();
+						const connection = aiConnections.find((c: any) => c.id === connectionId);
+						const connectionName = connection?.name || connectionId;
+
+						const prefixedModels = data.map((model: any) => ({
+							value: `${connectionId}:${model.value}`,
+							label: `[${connectionName}] ${model.label}`,
+							connectionId,
+							originalValue: model.value
+						}));
+
+						allModels.push(...prefixedModels);
+					}
+				} catch (err) {
+					// Silently handle errors
+				}
+			}
+
+			models = allModels;
+
+			// Auto-select first model if none selected or current selection is invalid
+			if (models.length > 0) {
+				const currentModelValid = models.some((m: any) => m.value === value);
+				if (!value || !currentModelValid) {
+					value = models[0].value;
+				}
 			}
 		} catch (error) {
-			console.error('Failed to fetch models:', error);
 			models = [];
 		} finally {
 			loading = false;
@@ -86,23 +84,32 @@
 				aiConnections = await response.json();
 			}
 		} catch (error) {
-			console.error('Failed to load connections:', error);
+			// Silently handle errors
 		}
 	}
 
-	onMount(() => {
-		loadConnections();
-		loadModels();
+	onMount(async () => {
+		await loadConnections();
+		await loadModels();
 	});
 
 	// Reload models when connections change
 	let previousConnectionIds = $state<string[]>([]);
 	$effect(() => {
 		const currentConnectionIds = chatStore.connectionIds;
-		const idsChanged = JSON.stringify(currentConnectionIds) !== JSON.stringify(previousConnectionIds);
+		const idsChanged =
+			JSON.stringify(currentConnectionIds) !== JSON.stringify(previousConnectionIds);
 		if (idsChanged) {
 			previousConnectionIds = [...currentConnectionIds];
 			loadModels();
+
+			// Reset selected model if it's not from an active connection
+			if (value && value.includes(':')) {
+				const [connId] = value.split(':', 2);
+				if (!currentConnectionIds.includes(connId)) {
+					value = '';
+				}
+			}
 		}
 	});
 

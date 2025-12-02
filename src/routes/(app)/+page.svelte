@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChatMessages, ChatInput, ModelSelector } from '$lib/components/chat';
+	import { ChatMessages, ChatInput } from '$lib/components/chat';
 	import { useChat } from '$lib/hooks/useChat.svelte';
 	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import { onMount } from 'svelte';
@@ -7,8 +7,6 @@
 	import AppHeader from '$lib/components/AppHeader.svelte';
 
 	const chat = useChat();
-
-	let { data } = $props();
 
 	onMount(async () => {
 		await chatStore.loadChats();

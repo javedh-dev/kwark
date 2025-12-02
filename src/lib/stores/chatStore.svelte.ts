@@ -49,6 +49,7 @@ function createChatStore() {
 	let chats = $state<Chat[]>([]);
 	let currentChatId = $state<string | null>(null);
 	let isLoading = $state(false);
+	let isSending = $state(false);
 	let selectedModel = $state('');
 	let temperature = $state(0.7);
 	let customAttributes = $state<Record<string, string>>({});
@@ -67,6 +68,9 @@ function createChatStore() {
 		},
 		get isLoading() {
 			return isLoading;
+		},
+		get isSending() {
+			return isSending;
 		},
 		get selectedModel() {
 			return selectedModel;
@@ -109,17 +113,19 @@ function createChatStore() {
 						connectionIds = [defaultConn.id];
 					}
 				}
-			} catch (error) {
-				console.error('Error loading default connection:', error);
+			} catch {
+				// Silently handle errors
 			}
 		},
 
 		async loadChats() {
 			isLoading = true;
 			try {
-				// Load default connection first
-				await this.loadDefaultConnection();
-				
+				// Load default connection first if no connections are set
+				if (connectionIds.length === 0) {
+					await this.loadDefaultConnection();
+				}
+
 				const url = '/api/chats';
 				const data = await apiRequest(url);
 				chats = data.map((chat: Chat & { createdAt: string; updatedAt: string }) => ({
@@ -131,8 +137,8 @@ function createChatStore() {
 				if (chats.length > 0 && !currentChatId) {
 					currentChatId = chats[0].id;
 				}
-			} catch (error) {
-				console.error('Error loading chats:', error);
+			} catch {
+				// Silently handle errors
 			} finally {
 				isLoading = false;
 			}
@@ -174,61 +180,183 @@ function createChatStore() {
 				// Load chat-specific LLM settings
 				systemPrompt = chat.systemPrompt || '';
 				temperature = chat.temperature ? parseFloat(chat.temperature) : 0.7;
-				customAttributes = chat.llmParams ? JSON.parse(chat.llmParams) : {};
+
+				// Parse llmParams which may contain both custom attributes and connectionIds
+				if (chat.llmParams) {
+					try {
+						const params = JSON.parse(chat.llmParams);
+						const { connectionIds: savedConnectionIds, ...attrs } = params;
+						customAttributes = attrs;
+
+						// Restore connection IDs if saved
+						if (savedConnectionIds && Array.isArray(savedConnectionIds)) {
+							connectionIds = savedConnectionIds;
+						}
+					} catch {
+						// Fallback for old format (just custom attributes)
+						customAttributes = chat.llmParams ? JSON.parse(chat.llmParams) : {};
+					}
+				} else {
+					customAttributes = {};
+				}
 			}
 		},
 
-		async updateCurrentChat(messages: Message[]) {
+		addMessageToChat(chatId: string, message: Message) {
+			chats = chats.map((chat) => {
+				if (chat.id === chatId) {
+					return {
+						...chat,
+						messages: [...chat.messages, message],
+						updatedAt: Date.now()
+					};
+				}
+				return chat;
+			});
+		},
+
+		updateMessageInChat(chatId: string, messageId: number, updates: Partial<Message>) {
+			chats = chats.map((chat) => {
+				if (chat.id === chatId) {
+					return {
+						...chat,
+						messages: chat.messages.map((m) => (m.id === messageId ? { ...m, ...updates } : m)),
+						updatedAt: Date.now()
+					};
+				}
+				return chat;
+			});
+		},
+
+		async saveMessage(chatId: string, message: Message) {
+			await apiRequest(`/api/chats/${chatId}/messages`, {
+				method: 'POST',
+				body: JSON.stringify({
+					role: message.role,
+					content: message.content,
+					...(message.model && { model: message.model }),
+					...(message.thinking && { thinking: message.thinking })
+				})
+			});
+		},
+
+		async sendMessage(content: string) {
+			if (!content.trim() || isSending) return;
+
+			// Ensure we have a current chat
 			if (!currentChatId) {
 				await this.createNewChat();
 			}
-
 			if (!currentChatId) return;
 
+			const chatId = currentChatId;
+			const userMessageId = Date.now();
+			const userMessage: Message = {
+				id: userMessageId,
+				role: 'user',
+				content: content.trim()
+			};
+
+			// 1. Add user message locally
+			this.addMessageToChat(chatId, userMessage);
+			isSending = true;
+
 			try {
-				// Generate title from first user message if needed
-				const currentChat = chats.find((c) => c.id === currentChatId);
-				const needsTitle = currentChat && currentChat.messages.length === 0;
-				const title = needsTitle ? this.generateChatTitle(messages) : undefined;
+				// 2. Save user message to server
+				await this.saveMessage(chatId, userMessage);
 
-				// Update title if needed
-				if (title) {
-					await apiRequest(`/api/chats/${currentChatId}`, {
-						method: 'PATCH',
-						body: JSON.stringify({ title })
-					});
+				// 3. Generate title if first message
+				const currentChat = chats.find((c) => c.id === chatId);
+				if (currentChat && currentChat.messages.length === 1) {
+					const title = this.generateChatTitle([userMessage]);
+					await this.renameChat(chatId, title);
 				}
 
-				// Add new messages
-				const existingMessageCount = currentChat?.messages.length || 0;
-				const newMessages = messages.slice(existingMessageCount);
+				// 4. Prepare for assistant response
+				const assistantMessageId = Date.now() + 1;
+				const assistantMessage: Message = {
+					id: assistantMessageId,
+					role: 'assistant',
+					content: ''
+				};
+				this.addMessageToChat(chatId, assistantMessage);
 
-				for (const message of newMessages) {
-					await apiRequest(`/api/chats/${currentChatId}/messages`, {
-						method: 'POST',
-						body: JSON.stringify({
-							role: message.role,
-							content: message.content,
-							...(message.model && { model: message.model }),
-							...(message.thinking && { thinking: message.thinking })
-						})
-					});
-				}
+				// 5. Stream response
+				// Get fresh current chat to include the user message we just added
+				const freshChat = chats.find((c) => c.id === chatId);
+				const requestBody = {
+					messages:
+						freshChat?.messages
+							.filter((m) => m.id !== assistantMessageId)
+							.map((m) => ({ role: m.role, content: m.content })) || [],
+					model: selectedModel,
+					temperature: temperature,
+					customAttributes: customAttributes,
+					systemPrompt: systemPrompt,
+					connectionIds: connectionIds
+				};
 
-				// Update local state
-				chats = chats.map((chat) => {
-					if (chat.id === currentChatId) {
-						return {
-							...chat,
-							messages,
-							title: title || chat.title,
-							updatedAt: Date.now()
-						};
+				const response = await fetch('/api/chat', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(requestBody)
+				});
+
+				if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+				const reader = response.body?.getReader();
+				const decoder = new TextDecoder();
+				if (!reader) throw new Error('No response body');
+
+				let accumulatedContent = '';
+				let accumulatedThinking = '';
+
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+
+					const chunk = decoder.decode(value);
+					const lines = chunk.split('\n');
+
+					for (const line of lines) {
+						if (line.startsWith('data: ')) {
+							try {
+								const parsed = JSON.parse(line.slice(6));
+
+								if (parsed.type === 'content') {
+									accumulatedContent += parsed.data;
+									this.updateMessageInChat(chatId, assistantMessageId, {
+										content: accumulatedContent,
+										model: selectedModel,
+										thinking: accumulatedThinking || undefined
+									});
+								} else if (parsed.type === 'thinking') {
+									accumulatedThinking += parsed.data;
+									this.updateMessageInChat(chatId, assistantMessageId, {
+										content: accumulatedContent,
+										model: selectedModel,
+										thinking: accumulatedThinking
+									});
+								}
+							} catch {
+								// Silently handle parsing errors
+							}
+						}
 					}
-					return chat;
+				}
+
+				// 6. Save assistant message to server
+				await this.saveMessage(chatId, {
+					...assistantMessage,
+					content: accumulatedContent,
+					model: selectedModel,
+					thinking: accumulatedThinking || undefined
 				});
 			} catch (error) {
-				console.error('Error updating chat:', error);
+				console.error('Error sending message:', error);
+				// Optionally add error message to chat
+			} finally {
+				isSending = false;
 			}
 		},
 
@@ -243,32 +371,27 @@ function createChatStore() {
 				if (currentChatId === chatId) {
 					currentChatId = chats.length > 0 ? chats[0].id : null;
 				}
-			} catch (error) {
-				console.error('Error deleting chat:', error);
+			} catch {
+				// Silently handle errors
 			}
 		},
 
 		async renameChat(chatId: string, newTitle: string) {
-			try {
-				await apiRequest(`/api/chats/${chatId}`, {
-					method: 'PATCH',
-					body: JSON.stringify({ title: newTitle })
-				});
+			await apiRequest(`/api/chats/${chatId}`, {
+				method: 'PATCH',
+				body: JSON.stringify({ title: newTitle })
+			});
 
-				chats = chats.map((chat) => {
-					if (chat.id === chatId) {
-						return {
-							...chat,
-							title: newTitle,
-							updatedAt: Date.now()
-						};
-					}
-					return chat;
-				});
-			} catch (error) {
-				console.error('Error renaming chat:', error);
-				throw error;
-			}
+			chats = chats.map((chat) => {
+				if (chat.id === chatId) {
+					return {
+						...chat,
+						title: newTitle,
+						updatedAt: Date.now()
+					};
+				}
+				return chat;
+			});
 		},
 
 		async saveChatSettings() {
@@ -286,16 +409,23 @@ function createChatStore() {
 					settings.temperature = temperature.toString();
 				}
 
+				// Build llmParams object with both custom attributes and connectionIds
+				const paramsObj: Record<string, any> = {};
+
 				// Filter out empty custom attributes
-				const nonEmptyAttrs: Record<string, string> = {};
 				Object.entries(customAttributes).forEach(([key, value]) => {
 					if (value && value.trim()) {
-						nonEmptyAttrs[key] = value.trim();
+						paramsObj[key] = value.trim();
 					}
 				});
 
-				if (Object.keys(nonEmptyAttrs).length > 0) {
-					settings.llmParams = JSON.stringify(nonEmptyAttrs);
+				// Save connection IDs if not default
+				if (connectionIds.length > 0) {
+					paramsObj.connectionIds = connectionIds;
+				}
+
+				if (Object.keys(paramsObj).length > 0) {
+					settings.llmParams = JSON.stringify(paramsObj);
 				}
 
 				// Only send request if there are settings to save
@@ -317,8 +447,8 @@ function createChatStore() {
 						return chat;
 					});
 				}
-			} catch (error) {
-				console.error('Error saving chat settings:', error);
+			} catch {
+				// Silently handle errors
 			}
 		},
 

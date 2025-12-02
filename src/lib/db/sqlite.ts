@@ -238,7 +238,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
 		isDefault?: boolean;
 	}): Promise<void> {
 		const now = new Date();
-		
+
 		// If this is set as default, unset all other defaults
 		if (connection.isDefault) {
 			await this.db.update(schema.aiConnections).set({ isDefault: false });
@@ -257,10 +257,13 @@ export class SQLiteAdapter implements DatabaseAdapter {
 	}
 
 	async getAiConnections(): Promise<(typeof schema.aiConnections.$inferSelect)[]> {
-		return await this.db.select().from(schema.aiConnections).orderBy(desc(schema.aiConnections.createdAt));
+		return await this.db
+			.select()
+			.from(schema.aiConnections)
+			.orderBy(desc(schema.aiConnections.createdAt));
 	}
 
-	async getAiConnection(id: string): Promise<(typeof schema.aiConnections.$inferSelect) | null> {
+	async getAiConnection(id: string): Promise<typeof schema.aiConnections.$inferSelect | null> {
 		const connections = await this.db
 			.select()
 			.from(schema.aiConnections)
@@ -268,7 +271,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
 		return connections.length > 0 ? connections[0] : null;
 	}
 
-	async getDefaultAiConnection(): Promise<(typeof schema.aiConnections.$inferSelect) | null> {
+	async getDefaultAiConnection(): Promise<typeof schema.aiConnections.$inferSelect | null> {
 		const connections = await this.db
 			.select()
 			.from(schema.aiConnections)

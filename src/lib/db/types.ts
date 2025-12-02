@@ -52,13 +52,16 @@ export interface DatabaseAdapter {
 	getAiConnections(): Promise<AiConnection[]>;
 	getAiConnection(id: string): Promise<AiConnection | null>;
 	getDefaultAiConnection(): Promise<AiConnection | null>;
-	updateAiConnection(id: string, data: {
-		name?: string;
-		baseUrl?: string;
-		apiKey?: string;
-		defaultModel?: string;
-		isDefault?: boolean;
-	}): Promise<void>;
+	updateAiConnection(
+		id: string,
+		data: {
+			name?: string;
+			baseUrl?: string;
+			apiKey?: string;
+			defaultModel?: string;
+			isDefault?: boolean;
+		}
+	): Promise<void>;
 	deleteAiConnection(id: string): Promise<void>;
 
 	close(): Promise<void>;

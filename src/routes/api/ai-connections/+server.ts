@@ -14,7 +14,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 	try {
 		const connections = await db.getAiConnections();
 		// Don't expose API keys in the list
-		const sanitized = connections.map(conn => ({
+		const sanitized = connections.map((conn) => ({
 			...conn,
 			apiKey: '***' + conn.apiKey.slice(-4)
 		}));

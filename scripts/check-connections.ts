@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * Check AI connections status
- * 
+ *
  * Usage: npx tsx scripts/check-connections.ts
  */
 
@@ -38,12 +38,11 @@ async function checkConnections() {
 			console.log('');
 		});
 
-		const defaultConn = connections.find(c => c.isDefault);
+		const defaultConn = connections.find((c) => c.isDefault);
 		if (!defaultConn) {
 			console.log('⚠️  No default connection set');
 			console.log('   Set one as default in Settings > AI Connections');
 		}
-
 	} catch (error) {
 		console.error('❌ Error checking connections:', error);
 		process.exit(1);

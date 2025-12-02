@@ -7,10 +7,9 @@
 		value: string;
 		isLoading: boolean;
 		onSubmit: () => void;
-		onInput: (value: string) => void;
 	}
 
-	let { value = $bindable(), isLoading, onSubmit, onInput }: Props = $props();
+	let { value = $bindable(), isLoading, onSubmit }: Props = $props();
 	let textareaRef: HTMLTextAreaElement | null = $state(null);
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -30,7 +29,6 @@
 
 	// Reset height when value changes (e.g., when message is sent and cleared)
 	$effect(() => {
-		value; // Explicitly track value changes
 		if (textareaRef) {
 			textareaRef.style.height = 'auto';
 			textareaRef.style.height = textareaRef.scrollHeight + 'px';
@@ -48,7 +46,7 @@
 					oninput={handleInput}
 					onkeydown={handleKeydown}
 					placeholder="Ask anything..."
-					class="max-h-[200px] min-h-[64px] resize-none border-none bg-transparent px-6 pt-4 pb-0 leading-snug shadow-none focus-visible:ring-0 md:text-base dark:bg-transparent"
+					class="max-h-[200px] min-h-16 resize-none border-none bg-transparent px-6 pt-4 pb-0 leading-snug shadow-none focus-visible:ring-0 md:text-base dark:bg-transparent"
 					disabled={isLoading}
 				/>
 				<div class="flex items-center justify-between px-4 pb-2">
