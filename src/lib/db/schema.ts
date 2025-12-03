@@ -55,6 +55,18 @@ export const aiConnections = sqliteTable('ai_connections', {
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 });
 
+export const userModelPreferences = sqliteTable('user_model_preferences', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	userId: text('user_id')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' }),
+	connectionId: text('connection_id').notNull(),
+	modelId: text('model_id').notNull(),
+	isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(true),
+	createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
@@ -65,3 +77,5 @@ export type Message = typeof messages.$inferSelect;
 export type InsertMessage = typeof messages.$inferInsert;
 export type AiConnection = typeof aiConnections.$inferSelect;
 export type InsertAiConnection = typeof aiConnections.$inferInsert;
+export type UserModelPreference = typeof userModelPreferences.$inferSelect;
+export type InsertUserModelPreference = typeof userModelPreferences.$inferInsert;

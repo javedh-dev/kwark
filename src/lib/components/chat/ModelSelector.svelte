@@ -11,6 +11,7 @@
 
 	let models = $state<any>([]);
 	let loading = $state(true);
+	let modelPreferences = $state<any[]>([]);
 
 	// Fetch models from API
 	async function loadModels() {
@@ -34,6 +35,16 @@
 				return;
 			}
 
+			// Load model preferences
+			try {
+				const prefResponse = await fetch('/api/model-preferences');
+				if (prefResponse.ok) {
+					modelPreferences = await prefResponse.json();
+				}
+			} catch (err) {
+				// Silently handle errors
+			}
+
 			const allModels: any[] = [];
 
 			for (const connectionId of connectionIds) {
@@ -52,7 +63,16 @@
 							originalValue: model.value
 						}));
 
-						allModels.push(...prefixedModels);
+						// Filter out disabled models
+						const enabledModels = prefixedModels.filter((model: any) => {
+							const pref = modelPreferences.find(
+								(p) => p.connectionId === connectionId && p.modelId === model.originalValue
+							);
+							// Show if no preference exists (default enabled) or if explicitly enabled
+							return !pref || pref.isEnabled;
+						});
+
+						allModels.push(...enabledModels);
 					}
 				} catch (err) {
 					// Silently handle errors
@@ -124,13 +144,35 @@
 		<span class="text-sm text-destructive">No connection configured</span>
 	{:else}
 		<Select.Root type="single" bind:value>
-			<Select.Trigger class="w-auto border-none shadow-none" placeholder="Select a model">
-				{currentLabel}
+			<Select.Trigger class="w-auto border-none shadow-none hover:bg-muted/50 transition-colors" placeholder="Select a model">
+				<div class="flex items-center gap-2">
+					{#if value && value.includes(':')}
+						{@const [connId] = value.split(':', 2)}
+						{@const connection = aiConnections.find((c) => c.id === connId)}
+						{@const modelInfo = models.find((m: any) => m.value === value)}
+						{#if connection && modelInfo}
+							<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+								{connection.name}
+							</span>
+							<span class="text-sm font-medium">{modelInfo.originalValue}</span>
+						{:else}
+							<span class="text-sm font-medium">{currentLabel}</span>
+						{/if}
+					{:else}
+						<span class="text-sm font-medium">{currentLabel}</span>
+					{/if}
+				</div>
 			</Select.Trigger>
-			<Select.Content>
+			<Select.Content class="max-w-md">
 				{#each models as model}
+					{@const connection = aiConnections.find((c) => c.id === model.connectionId)}
 					<Select.Item value={model.value} label={model.label}>
-						{model.label}
+						<div class="flex items-center gap-2 py-1">
+							<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+								{connection?.name || model.connectionId}
+							</span>
+							<span class="font-medium">{model.originalValue}</span>
+						</div>
 					</Select.Item>
 				{/each}
 			</Select.Content>

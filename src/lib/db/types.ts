@@ -73,9 +73,27 @@ export interface DatabaseAdapter {
 	): Promise<void>;
 	deleteAiConnection(id: string): Promise<void>;
 
+	// Model Preferences
+	getModelPreferences(userId: string): Promise<UserModelPreference[]>;
+	setModelPreference(
+		userId: string,
+		connectionId: string,
+		modelId: string,
+		isEnabled: boolean
+	): Promise<void>;
+
 	close(): Promise<void>;
 }
 
 export type UserData = User;
 export type MessageData = Message;
 export type ChatWithMessages = Chat & { messages: MessageData[] };
+export type UserModelPreference = {
+	id: number;
+	userId: string;
+	connectionId: string;
+	modelId: string;
+	isEnabled: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+};

@@ -29,4 +29,21 @@ export async function closeDatabase() {
 }
 
 export * from './types';
-export * from './schema';
+export {
+	users,
+	sessions,
+	chats,
+	messages,
+	aiConnections,
+	userModelPreferences,
+	type User,
+	type InsertUser,
+	type Session,
+	type InsertSession,
+	type Chat,
+	type InsertChat,
+	type Message,
+	type InsertMessage,
+	type AiConnection,
+	type InsertAiConnection
+} from './schema';

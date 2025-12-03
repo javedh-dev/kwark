@@ -62,9 +62,21 @@ export class SQLiteAdapter implements DatabaseAdapter {
 				updated_at INTEGER NOT NULL
 			);
 
+			CREATE TABLE IF NOT EXISTS user_model_preferences (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				connection_id TEXT NOT NULL,
+				model_id TEXT NOT NULL,
+				is_enabled INTEGER NOT NULL DEFAULT 1,
+				created_at INTEGER NOT NULL,
+				updated_at INTEGER NOT NULL,
+				UNIQUE(user_id, connection_id, model_id)
+			);
+
 			CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
 			CREATE INDEX IF NOT EXISTS idx_chats_user_id ON chats(user_id);
 			CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id);
+			CREATE INDEX IF NOT EXISTS idx_user_model_prefs_user_id ON user_model_preferences(user_id);
 		`);
 	}
 
@@ -311,6 +323,50 @@ export class SQLiteAdapter implements DatabaseAdapter {
 
 	async deleteAiConnection(id: string): Promise<void> {
 		await this.db.delete(schema.aiConnections).where(eq(schema.aiConnections.id, id));
+	}
+
+	async getModelPreferences(userId: string): Promise<any[]> {
+		return await this.db
+			.select()
+			.from(schema.userModelPreferences)
+			.where(eq(schema.userModelPreferences.userId, userId));
+	}
+
+	async setModelPreference(
+		userId: string,
+		connectionId: string,
+		modelId: string,
+		isEnabled: boolean
+	): Promise<void> {
+		const now = new Date();
+
+		// Check if preference exists
+		const existing = await this.db
+			.select()
+			.from(schema.userModelPreferences)
+			.where(
+				eq(schema.userModelPreferences.userId, userId) &&
+				eq(schema.userModelPreferences.connectionId, connectionId) &&
+				eq(schema.userModelPreferences.modelId, modelId)
+			);
+
+		if (existing.length > 0) {
+			// Update existing
+			await this.db
+				.update(schema.userModelPreferences)
+				.set({ isEnabled, updatedAt: now })
+				.where(eq(schema.userModelPreferences.id, existing[0].id));
+		} else {
+			// Insert new
+			await this.db.insert(schema.userModelPreferences).values({
+				userId,
+				connectionId,
+				modelId,
+				isEnabled,
+				createdAt: now,
+				updatedAt: now
+			});
+		}
 	}
 
 	async close(): Promise<void> {

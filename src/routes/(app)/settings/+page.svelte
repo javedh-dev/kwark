@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { themeStore } from '$lib/stores/themeStore.svelte';
+	import ModelManagement from '$lib/components/ModelManagement.svelte';
 	import {
 		Sun,
 		Moon,
@@ -11,7 +12,8 @@
 		Plug,
 		Plus,
 		Trash2,
-		Check
+		Check,
+		Cpu
 	} from '@lucide/svelte';
 
 	let activeTab = $state('appearance');
@@ -41,6 +43,7 @@
 	const tabs = [
 		{ id: 'appearance', label: 'Appearance', icon: Palette },
 		{ id: 'ai-connections', label: 'AI Connections', icon: Plug },
+		{ id: 'models', label: 'Models', icon: Cpu },
 		{ id: 'profile', label: 'Profile', icon: User },
 		{ id: 'notifications', label: 'Notifications', icon: Bell },
 		{ id: 'privacy', label: 'Privacy & Security', icon: Shield }
@@ -453,6 +456,10 @@
 									</p>
 								{/each}
 							</div>
+						</div>
+					{:else if activeTab === 'models'}
+						<div>
+							<ModelManagement />
 						</div>
 					{:else if activeTab === 'appearance'}
 						<div>
