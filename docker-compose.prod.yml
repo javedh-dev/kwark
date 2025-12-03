@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  kwark:
+    image: ghcr.io/${GITHUB_USERNAME}/kwark:${IMAGE_TAG:-latest}
+    container_name: kwark-production
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      - NODE_ENV=production
+      - DATABASE_PATH=/app/data/
+      - PORT=3000
+      - HOST=0.0.0.0
+    volumes:
+      - kwark-data:/app/data
+      # Optional: Mount custom config
+      # - ./config:/app/config:ro
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - kwark-network
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+volumes:
+  kwark-data:
+    driver: local
+    # Optional: Use a named volume with backup support
+    # driver_opts:
+    #   type: none
+    #   o: bind
+    #   device: /path/to/persistent/storage
+
+networks:
+  kwark-network:
+    driver: bridge
